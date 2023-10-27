@@ -7,4 +7,5 @@ public record ResultResponse<T>(
         String message,
         T data
 ) implements Serializable {
+
 }
