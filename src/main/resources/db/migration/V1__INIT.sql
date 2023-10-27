@@ -252,7 +252,7 @@ CREATE TABLE voucher
     created_date    TIMESTAMP WITHOUT TIME ZONE,
     user_id         BIGINT,
     CONSTRAINT pk_voucher PRIMARY KEY (id)
-);category.sql
+);
 
 ALTER TABLE address
     ADD CONSTRAINT FK_ADDRESS_ON_USER FOREIGN KEY (user_id) REFERENCES "user" (id);
