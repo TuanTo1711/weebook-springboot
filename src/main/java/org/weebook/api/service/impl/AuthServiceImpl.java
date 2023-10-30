@@ -12,19 +12,20 @@ import org.weebook.api.config.RoleDtoConfig;
 import org.weebook.api.dto.RoleDto;
 import org.weebook.api.dto.UserDto;
 import org.weebook.api.dto.mapper.UserMapper;
-import org.weebook.api.entity.Role;
 import org.weebook.api.entity.User;
 import org.weebook.api.exception.ErrorMessages;
 import org.weebook.api.repository.RoleRepo;
 import org.weebook.api.repository.UserRepo;
 import org.weebook.api.service.AuthService;
 import org.weebook.api.util.JwtUtils;
+import org.weebook.api.web.request.ChangePasswordRequest;
 import org.weebook.api.web.request.SignInFormRequest;
 import org.weebook.api.web.request.SignUpFormRequest;
 import org.weebook.api.web.response.JwtResponse;
 import org.weebook.api.web.response.SignUpFormResponse;
 import org.weebook.api.web.response.UpdateFormResponse;
 
+import java.security.Principal;
 import java.util.Optional;
 
 
@@ -95,6 +96,7 @@ public class AuthServiceImpl implements AuthService {
                 .userNew(updateUser)
                 .build();
     }
+
 
     @Override
     public JwtResponse removeAuth(SignInFormRequest signInFormRequest) throws Exception {

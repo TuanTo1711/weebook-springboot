@@ -8,12 +8,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.weebook.api.dto.UserDto;
 import org.weebook.api.service.AuthService;
+import org.weebook.api.web.request.ChangePasswordRequest;
 import org.weebook.api.web.request.SignInFormRequest;
 import org.weebook.api.web.request.SignUpFormRequest;
 import org.weebook.api.web.response.JwtResponse;
 import org.weebook.api.web.response.ResultResponse;
 import org.weebook.api.web.response.SignUpFormResponse;
 import org.weebook.api.web.response.UpdateFormResponse;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("api/v1/auth")
@@ -51,5 +54,6 @@ public class AuthController {
                 .data(authService.updateProfile(userDto, userId))
                 .build();
     }
+
 
 }
