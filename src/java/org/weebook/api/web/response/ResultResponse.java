@@ -11,4 +11,5 @@ public record ResultResponse<T>(
         T data
 
 ) implements Serializable {
+
 }
