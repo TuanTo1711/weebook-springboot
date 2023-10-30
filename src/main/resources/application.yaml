@@ -1,0 +1,4 @@
+app:
+  key:
+    public-key: classpath:key/publickey.pem
+    private-key: classpath:key/privatekey.pem
