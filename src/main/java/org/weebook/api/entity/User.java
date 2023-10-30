@@ -80,26 +80,32 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Transaction> transactions = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Notification> notifications = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Address> addresses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Voucher> vouchers = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Favorite> favorites = new LinkedHashSet<>();
 
     @Override

@@ -36,6 +36,7 @@ public class Genre implements Serializable {
 
     @ManyToMany(mappedBy = "genres")
     @ToString.Exclude
+    @Builder.Default
     private Set<Product> products = new LinkedHashSet<>();
 
     @Override

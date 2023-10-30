@@ -17,6 +17,7 @@ public class JwtResponse {
 
     private String accessToken;
 
+    @Builder.Default
     private String type = "Bearer ";
 
 }

@@ -1,14 +1,13 @@
 package org.weebook.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Builder
 @AllArgsConstructor
@@ -17,11 +16,11 @@ import java.util.Set;
 @Setter
 @ToString
 @Entity
-@Table(name = "series")
-public class Series implements Serializable {
+@Table(name = "category")
+public class Category implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 8415098250719261194L;
+    private static final long serialVersionUID = -5363232846859329735L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,15 +30,15 @@ public class Series implements Serializable {
     @Column(name = "name", length = Integer.MAX_VALUE)
     private String name;
 
-    @Column(name = "newest_chapter")
-    private String newestChapter;
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "parent_category_id")
+    private Category parent;
 
-    @Column(name = "follower")
-    private Long follower;
-
-    @OneToMany(mappedBy = "series")
+    @OneToMany(mappedBy = "parent")
     @ToString.Exclude
-    private Set<Product> products = new LinkedHashSet<>();
+    @Builder.Default
+    private List<Category> children = new LinkedList<>();
 
     @Override
     public final boolean equals(Object o) {
@@ -52,7 +51,7 @@ public class Series implements Serializable {
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Series entity = (Series) o;
+        Category entity = (Category) o;
         return getId() != null && Objects.equals(getId(), entity.getId());
     }
 

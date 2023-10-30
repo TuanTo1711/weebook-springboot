@@ -22,11 +22,11 @@ import java.util.Objects;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    public static final String DEAULT_INTERAL_SERVER_ERROR_MESSAGE = ErrorMessages.DEFAULT_INTERNAL_SERVER_ERROR;
+    public static final String DEFAULT_INTERNAL_SERVER_ERROR_MESSAGE = ErrorMessages.DEFAULT_INTERNAL_SERVER_ERROR;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(MethodArgumentNotValidException ex) {
+    public ErrorResponse<List<ValidationError>> handleValidationException(MethodArgumentNotValidException ex) {
         List<ValidationError> errors = new ArrayList<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(fieldError -> {
@@ -35,25 +35,25 @@ public class GlobalExceptionHandler {
                     validationError.setMessage(fieldError.getDefaultMessage());
                     errors.add(validationError);
                 });
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Validation Error ", errors);
+        return new ErrorResponse<>(HttpStatus.BAD_REQUEST.value(), "Validation Error ", errors);
     }
 
     @ExceptionHandler({Exception.class, Throwable.class})
     public ResultResponse<JwtResponse> internalExceptionHandler(Exception ex) {
-        return new ResultResponse (HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        return new ResultResponse<> (HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 Objects.nonNull(ex.getLocalizedMessage()) ? ex.getLocalizedMessage() : ErrorMessages.DEFAULT_INTERNAL_SERVER_ERROR,
                 null);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResultResponse<JwtResponse> UserNotFoundException(Exception ex) {
-        return new ResultResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage(), null);
+    public ResultResponse<JwtResponse> userNotFoundException(Exception ex) {
+        return new ResultResponse<>(HttpStatus.NOT_FOUND.value(), ex.getMessage(), null);
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
-    public ResultResponse<JwtResponse> InsufficientFundsException(Exception ex) {
+    public ResultResponse<JwtResponse> insufficientFundsException(Exception ex) {
         log.error(ex.getLocalizedMessage(), ex);
-        return new ResultResponse(HttpStatus.BAD_REQUEST.value(),
+        return new ResultResponse<>(HttpStatus.BAD_REQUEST.value(),
                 Objects.nonNull(ex.getLocalizedMessage()) ? ex.getLocalizedMessage() : ErrorMessages.INSUFFICIENT_FUNDS_ERROR,
                 null);
     }

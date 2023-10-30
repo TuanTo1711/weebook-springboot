@@ -126,6 +126,7 @@ public class Product implements Serializable {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @Builder.Default
     private List<Author> authors = new LinkedList<>();
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
@@ -133,23 +134,28 @@ public class Product implements Serializable {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "genres_id"))
     @ToString.Exclude
+    @Builder.Default
     private List<Genre> genres = new LinkedList<>();
 
     @ElementCollection
     @Column(name = "image_url")
     @CollectionTable(name = "products_image", joinColumns = @JoinColumn(name = "products_id"))
+    @Builder.Default
     private Set<String> images = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
+    @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
+    @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
+    @Builder.Default
     private Set<Favorite> favorites = new LinkedHashSet<>();
 
     @Override

@@ -57,6 +57,7 @@ public class Event implements Serializable {
 
     @OneToMany(mappedBy = "event")
     @ToString.Exclude
+    @Builder.Default
     private Set<Product> products = new LinkedHashSet<>();
 
     @Override

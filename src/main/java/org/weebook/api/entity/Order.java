@@ -55,22 +55,27 @@ public class Order implements Serializable {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @Builder.Default
     private Set<Payment> payments = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "order")
     @ToString.Exclude
+    @Builder.Default
     private Set<Transaction> transactions = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "order")
     @ToString.Exclude
+    @Builder.Default
     private Set<OrderFeedback> orderFeedbacks = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "order")
     @ToString.Exclude
+    @Builder.Default
     private Set<OrderStatus> orderStatuses = new LinkedHashSet<>();
 
     @Override
