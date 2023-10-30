@@ -1,5 +1,6 @@
 package org.weebook.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -30,12 +31,9 @@ public class Category implements Serializable {
     private String name;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "parent_category_id")
     private Category parent;
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
-    @ToString.Exclude
-    private Set<Product> products = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "parent")
     @ToString.Exclude
