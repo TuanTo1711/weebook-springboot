@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/books
@@ -9,3 +10,9 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+=======
+app:
+  key:
+    public-key: classpath:key/publickey.pem
+    private-key: classpath:key/privatekey.pem
+>>>>>>> 855e50847766bad6e07ad9bf842a92576097cabe

@@ -19,6 +19,6 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDto> findAll() {
         List<Category> category = categoryRepository.findAll();
         List<Category> listCategory = category.stream().filter(c -> c.getParent() == null).toList();
-        return  categoryMapper.ListToDto(listCategory);
+        return  categoryMapper.listToDto(listCategory);
     }
 }

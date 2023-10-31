@@ -12,7 +12,7 @@ public interface CategoryMapper {
 
     CategoryDto toDto(Category category);
 
-    List<CategoryDto> ListToDto(List<Category> category);
+    List<CategoryDto> listToDto(List<Category> category);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Category partialUpdate(CategoryDto categoryDto, @MappingTarget Category category);
