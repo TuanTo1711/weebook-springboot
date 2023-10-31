@@ -139,20 +139,21 @@ public class Product implements Serializable {
 
     @ElementCollection
     @Column(name = "image_url")
+    @Builder.Default
     @CollectionTable(name = "products_image", joinColumns = @JoinColumn(name = "products_id"))
     @Builder.Default
     private Set<String> images = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
     @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
     @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
     @Builder.Default

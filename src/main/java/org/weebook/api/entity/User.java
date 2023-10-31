@@ -92,17 +92,17 @@ public class User implements UserDetails {
     @ToString.Exclude
     @Builder.Default
     private Set<Address> addresses = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
     private Set<Voucher> vouchers = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
