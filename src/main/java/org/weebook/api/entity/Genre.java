@@ -3,13 +3,9 @@ package org.weebook.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -21,12 +17,11 @@ import java.util.Set;
 @Setter
 @ToString
 @Entity
-@Table(name = "event")
-@EntityListeners(AuditingEntityListener.class)
-public class Event implements Serializable {
+@Table(name = "genres")
+public class Genre implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -3153847727330869998L;
+    private static final long serialVersionUID = -8374200547755887661L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,24 +34,9 @@ public class Event implements Serializable {
     @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
 
-    @Column(name = "start_date", nullable = false)
-    private Instant startDate;
-
-    @Column(name = "end_date", nullable = false)
-    private Instant endDate;
-
-    @Column(name = "discount_amount")
-    private BigDecimal discountAmount;
-
-    @Column(name = "event_type", length = Integer.MAX_VALUE)
-    private String eventType;
-
-    @CreatedDate
-    @Column(name = "created_date", nullable = false)
-    private Instant createdDate;
-
-    @OneToMany(mappedBy = "event")
+    @ManyToMany(mappedBy = "genres")
     @ToString.Exclude
+    @Builder.Default
     private Set<Product> products = new LinkedHashSet<>();
 
     @Override
@@ -70,7 +50,7 @@ public class Event implements Serializable {
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Event entity = (Event) o;
+        Genre entity = (Genre) o;
         return getId() != null && Objects.equals(getId(), entity.getId());
     }
 

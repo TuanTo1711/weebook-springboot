@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -20,58 +21,44 @@ import java.util.Set;
 @Setter
 @ToString
 @Entity
-@Table(name = "\"order\"")
-public class Order implements Serializable {
+@Table(name = "event")
+@EntityListeners(AuditingEntityListener.class)
+public class Event implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 29380345405553554L;
+    private static final long serialVersionUID = -3153847727330869998L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "order_date")
-    private Instant orderDate;
+    @Column(name = "name", length = Integer.MAX_VALUE)
+    private String name;
 
-    @Column(name = "total_amount")
-    private BigDecimal totalAmount;
+    @Column(name = "description", length = Integer.MAX_VALUE)
+    private String description;
 
-    @Column(name = "delivery_address", length = Integer.MAX_VALUE)
-    private String deliveryAddress;
+    @Column(name = "start_date", nullable = false)
+    private Instant startDate;
 
-    @Column(name = "shipping_method", length = Integer.MAX_VALUE)
-    private String shippingMethod;
+    @Column(name = "end_date", nullable = false)
+    private Instant endDate;
 
-    @Column(name = "delivery_date")
-    private Instant deliveryDate;
+    @Column(name = "discount_amount")
+    private BigDecimal discountAmount;
 
-    @Column(name = "delivery_status", length = Integer.MAX_VALUE)
-    private String deliveryStatus;
+    @Column(name = "event_type", length = Integer.MAX_VALUE)
+    private String eventType;
 
-    @Column(name = "created_date")
     @CreatedDate
+    @Column(name = "created_date", nullable = false)
     private Instant createdDate;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "event")
     @ToString.Exclude
-    private Set<Payment> payments = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "order")
-    @ToString.Exclude
-    private Set<Transaction> transactions = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "order")
-    @ToString.Exclude
-    private Set<OrderFeedback> orderFeedbacks = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private Set<OrderItem> orderItems = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "order")
-    @ToString.Exclude
-    private Set<OrderStatus> orderStatuses = new LinkedHashSet<>();
+    @Builder.Default
+    private Set<Product> products = new LinkedHashSet<>();
 
     @Override
     public final boolean equals(Object o) {
@@ -84,7 +71,7 @@ public class Order implements Serializable {
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Order entity = (Order) o;
+        Event entity = (Event) o;
         return getId() != null && Objects.equals(getId(), entity.getId());
     }
 

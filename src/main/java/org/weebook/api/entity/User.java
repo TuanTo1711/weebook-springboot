@@ -70,24 +70,27 @@ public class User implements Serializable {
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Transaction> transactions = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Notification> notifications = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Address> addresses = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     private Set<Review> reviews = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     private Set<Voucher> vouchers = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     private Set<Favorite> favorites = new LinkedHashSet<>();

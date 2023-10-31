@@ -1,13 +1,14 @@
 package org.weebook.api.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Builder
 @AllArgsConstructor
@@ -16,28 +17,25 @@ import java.util.*;
 @Setter
 @ToString
 @Entity
-@Table(name = "category")
-public class Category implements Serializable {
+@Table(name = "role")
+public class Role implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -5363232846859329735L;
+    private static final long serialVersionUID = 5075530316106373091L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", length = Integer.MAX_VALUE)
+    @Column(name = "name")
     private String name;
 
-    @ManyToOne
-    @JsonIgnore
-    @JoinColumn(name = "parent_category_id")
-    private Category parent;
-
-    @OneToMany(mappedBy = "parent")
-    @ToString.Exclude
-    private List<Category> children = new LinkedList<>();
+    @ElementCollection
+    @CollectionTable(name = "role_permission", joinColumns = @JoinColumn(name = "role_id"))
+    @Column(name = "name")
+    @Builder.Default
+    private Set<String> permissions = new LinkedHashSet<>();
 
     @Override
     public final boolean equals(Object o) {
@@ -50,7 +48,7 @@ public class Category implements Serializable {
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Category entity = (Category) o;
+        Role entity = (Role) o;
         return getId() != null && Objects.equals(getId(), entity.getId());
     }
 

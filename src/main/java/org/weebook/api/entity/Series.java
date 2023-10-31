@@ -17,24 +17,30 @@ import java.util.Set;
 @Setter
 @ToString
 @Entity
-@Table(name = "role")
-public class Role implements Serializable {
+@Table(name = "series")
+public class Series implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 5075530316106373091L;
+    private static final long serialVersionUID = 8415098250719261194L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", length = Integer.MAX_VALUE)
     private String name;
 
-    @ElementCollection
-    @CollectionTable(name = "role_permission", joinColumns = @JoinColumn(name = "role_id"))
-    @Column(name = "name")
-    private Set<String> permissions = new LinkedHashSet<>();
+    @Column(name = "newest_chapter")
+    private String newestChapter;
+
+    @Column(name = "follower")
+    private Long follower;
+
+    @OneToMany(mappedBy = "series")
+    @ToString.Exclude
+    @Builder.Default
+    private Set<Product> products = new LinkedHashSet<>();
 
     @Override
     public final boolean equals(Object o) {
@@ -47,7 +53,7 @@ public class Role implements Serializable {
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Role entity = (Role) o;
+        Series entity = (Series) o;
         return getId() != null && Objects.equals(getId(), entity.getId());
     }
 
