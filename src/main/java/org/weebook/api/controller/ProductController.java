@@ -1,6 +1,7 @@
 package org.weebook.api.controller;
 
 import lombok.AllArgsConstructor;
+
 import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
 import org.weebook.api.dto.ProductDto;
@@ -50,4 +51,5 @@ public class ProductController {
     public List<ProductDto> findByNameSuggest(@ModelAttribute PagingRequest pagingRequest, @RequestParam String name) {
         return productService.findByNameSuggest(name);
     }
+
 }

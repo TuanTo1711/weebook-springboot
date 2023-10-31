@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
+
 import java.io.Serial;
-import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Builder
 @AllArgsConstructor
@@ -21,7 +20,7 @@ import java.util.Set;
 @ToString
 @Entity
 @Table(name = "\"user\"")
-public class User implements Serializable {
+public class User implements UserDetails {
 
     @Serial
     private static final long serialVersionUID = 4807188618146090468L;
@@ -64,7 +63,13 @@ public class User implements Serializable {
     @Column(name = "deleted_date")
     private Instant deletedDate;
 
-    @OneToOne
+//    @CreatedDate
+//    private Instant created_At;
+//
+//    @LastModifiedDate
+//    private Instant updated_At;
+
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id")
     private Role role;
 
@@ -85,14 +90,17 @@ public class User implements Serializable {
     @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
     @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Voucher> vouchers = new LinkedHashSet<>();
     @Builder.Default
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
+    @Builder.Default
     private Set<Favorite> favorites = new LinkedHashSet<>();
 
     @Override
@@ -115,5 +123,41 @@ public class User implements Serializable {
         return this instanceof HibernateProxy hibernateProxy
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : getClass().hashCode();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorityList = AuthorityUtils.createAuthorityList(role.getPermissions());
+        return authorityList;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return Objects.isNull(deletedDate);
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

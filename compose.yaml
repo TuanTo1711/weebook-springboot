@@ -1,3 +1,4 @@
+
 version: '3.8'
 services:
   postgres:
@@ -6,5 +7,8 @@ services:
       - 'POSTGRES_DB=books'
       - 'POSTGRES_PASSWORD=123'
       - 'POSTGRES_USER=khoi'
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=root'
+      - 'POSTGRES_USER=root'
     ports:
       - '5432:5432'
