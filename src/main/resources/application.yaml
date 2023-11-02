@@ -1,4 +1,5 @@
 spring:
+<<<<<<< HEAD
   profiles:
     active: dev
 logging:
@@ -8,10 +9,23 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate: ERROR
     dev.weebook.api: DEBUG
+=======
+  datasource:
+    url: jdbc:postgresql://localhost:5432/books
+    username: khoi
+    password: 123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+>>>>>>> 4cebf82639ab426a5a1364fd94e370975c997f11
 app:
   key:
     public-key: classpath:key/publickey.pem
     private-key: classpath:key/privatekey.pem
+<<<<<<< HEAD
 
 ---
 spring:
@@ -19,3 +33,5 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Ho_Chi_Minh
 
+=======
+>>>>>>> 4cebf82639ab426a5a1364fd94e370975c997f11

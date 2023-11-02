@@ -67,12 +67,12 @@ public class Order implements Serializable {
     @ToString.Exclude
     @Builder.Default
     private Set<OrderFeedback> orderFeedbacks = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
-
+    @Builder.Default
     @OneToMany(mappedBy = "order")
     @ToString.Exclude
     @Builder.Default

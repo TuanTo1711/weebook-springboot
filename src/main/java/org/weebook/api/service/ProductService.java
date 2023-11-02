@@ -13,7 +13,16 @@ public interface ProductService {
 
     ProductDto update(ProductDto productDto, Long id) ;
 
-    PageImpl<ProductDto> saveListProduct(List<ProductDto> booksDTO);
+    List<ProductDto> saveListProduct(List<ProductDto> booksDTO);
+
+    PageImpl<ProductDto> filterProducts(Long id, PagingRequest pagingRequest);
+
+    PageImpl<ProductDto> findByName(PagingRequest pagingRequest,String name);
+
+    List<ProductDto> findByNameSuggest(String name);
+
+
+
 
     void delete(Long id) ;
 }
