@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DatabaseMigrationSettings" lastSelectedDirectory="src\main\java\org\weebook\api\entity" />
+  <component name="PersistenceUnitSettings">
+    <persistence-units>
+      <persistence-unit moduleName="weebook" name="user">
+        <packages>
+          <package value="org.weebook.api" />
+        </packages>
+      </persistence-unit>
+      <persistence-unit moduleName="weebook" name="Default">
+        <packages>
+          <package value="org.weebook.api" />
+        </packages>
+      </persistence-unit>
+    </persistence-units>
+  </component>
+</project>

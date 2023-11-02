@@ -3,6 +3,7 @@ package org.weebook.api.exception.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -40,7 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({Exception.class, Throwable.class})
     public ResultResponse<JwtResponse> internalExceptionHandler(Exception ex) {
-        return new ResultResponse<> (HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        return new ResultResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 Objects.nonNull(ex.getLocalizedMessage()) ? ex.getLocalizedMessage() : ErrorMessages.DEFAULT_INTERNAL_SERVER_ERROR,
                 null);
     }
@@ -57,4 +58,14 @@ public class GlobalExceptionHandler {
                 Objects.nonNull(ex.getLocalizedMessage()) ? ex.getLocalizedMessage() : ErrorMessages.INSUFFICIENT_FUNDS_ERROR,
                 null);
     }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResultResponse<JwtResponse> authenticationException(AuthenticationException ex) {
+        log.error(ex.getLocalizedMessage(), ex);
+        return new ResultResponse<>(HttpStatus.UNAUTHORIZED.value(),
+                Objects.nonNull(ex.getLocalizedMessage()) ? ex.getLocalizedMessage() : ErrorMessages.INSUFFICIENT_FUNDS_ERROR,
+                null);
+    }
+
+
 }

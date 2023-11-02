@@ -6,6 +6,7 @@ target/
 /src/main/resources/db/migration/**
 /compose.yaml
 /src/main/resources/application.dev.yaml
+* -text
 
 ### STS ###
 .apt_generated

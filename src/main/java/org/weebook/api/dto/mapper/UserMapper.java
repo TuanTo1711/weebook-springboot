@@ -16,7 +16,6 @@ public interface UserMapper {
     @Mapping(target = "accessToken", source = "token")
     JwtResponse toJwtResponse(UserDto userDto, String token);
 
-    @Mapping(target = "fullNameUser", expression = "java(user.getFirstName() +' '+ user.getLastName())")
     @Mapping(target = "usernameUser", source = "username")
     @Mapping(target = "emailUser", source = "email")
     UserDto toDto(User user);
@@ -28,6 +27,7 @@ public interface UserMapper {
     @Mapping(target = "firstName", source = "request.firstNameUser")
     @Mapping(target = "lastName", source = "request.lastNameUser")
     @Mapping(target = "password",source = "request.passwordUser")
+    @Mapping(target = "email",source = "request.emailUser")
     @Mapping(target = "role", source = "roleDto")
     User toEntity(SignUpFormRequest request, RoleDto roleDto);
 

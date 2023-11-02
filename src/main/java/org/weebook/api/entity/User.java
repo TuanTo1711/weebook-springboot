@@ -3,18 +3,15 @@ package org.weebook.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-
 import java.io.Serial;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Builder
@@ -68,11 +65,11 @@ public class User implements UserDetails {
     @Column(name = "deleted_date")
     private Instant deletedDate;
 
-//    @CreatedDate
-//    private Instant created_At;
-//
-//    @LastModifiedDate
-//    private Instant updated_At;
+    @Column(name = "otp_code", length = 4)
+    private String otpCode;
+
+    @Column(name = "otp_expiry_time")
+    private LocalDateTime otpExpiryTime;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id")
@@ -163,6 +160,9 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        if (otpExpiryTime != null && otpExpiryTime.isBefore(LocalDateTime.now())) {
+            return false;
+        }
+        return otpCode == null || !otpCode.isEmpty();
     }
 }

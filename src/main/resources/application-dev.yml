@@ -1,0 +1,29 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+---
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+---
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: hoangtantuan03@gmail.com
+    password: fmjd ohww xhbg xqsf
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

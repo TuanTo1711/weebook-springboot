@@ -37,7 +37,7 @@ public class JwtUtils {
         var header = JwsHeader.with(algorithm).build();
 
         var claims = JwtClaimsSet.builder()
-                .issuer("ZhuoFan")
+                .issuer("Weebook")
                 .audience(Collections.singletonList("web"))
                 .subject(authentication.getName())
                 .claim(AUTHORITIES_CLAIM_NAME, authorities)

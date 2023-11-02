@@ -52,6 +52,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> {
                     request.requestMatchers(HttpMethod.POST,"api/v1/auth/**").permitAll()
                             .requestMatchers(HttpMethod.GET,"api/v1/auth/**").hasAuthority("read")
+                            .requestMatchers(HttpMethod.GET, "/api/otp/**").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/otp/**").permitAll()
                             .anyRequest().authenticated();
 
 //                    request.requestMatchers(HttpMethod.POST,"api/v*/auth/**").hasAuthority("read");
@@ -65,13 +67,14 @@ public class SecurityConfig {
                             jwt.decoder(jwtDecoder())
                     );
                 });
+
         return httpSecurity
                 .build();
     }
 
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 
 

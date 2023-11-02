@@ -7,6 +7,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.weebook.api.config.RoleDtoConfig;
 import org.weebook.api.dto.RoleDto;
@@ -25,11 +26,9 @@ import org.weebook.api.web.response.JwtResponse;
 import org.weebook.api.web.response.SignUpFormResponse;
 import org.weebook.api.web.response.UpdateFormResponse;
 
-import java.security.Principal;
 import java.util.Optional;
 
 
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -40,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final RoleRepo roleRepo;
     private final PasswordEncoder passwordEncoder;
+    private final OTPServiceImpl otpService;
 
 
     @Override
@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepo.findByUsername(signInFormRequest.getUsername()).orElseThrow(() -> new UsernameNotFoundException(ErrorMessages.ACCOUNT_NOT_FOUND_ERROR));
         if (!passwordEncoder.matches(signInFormRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Password is not matches !");
+            throw new RuntimeException("Username or Password is not correct");
         }
         Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(user.getUsername(), null, user.getAuthorities());
         UserDto userDto = userMapper.toDto(user);
@@ -70,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userMapper.toEntity(signUpFormRequest, roledto);
         User saveUser = userRepo.save(user);
+        otpService.generateAndSendOTP(saveUser.getUsername());
         UserDto userDto = userMapper.toDto(saveUser);
 
         return SignUpFormResponse.builder()
@@ -97,6 +98,21 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    public ChangePasswordRequest changePassword(ChangePasswordRequest changePasswordRequest, JwtAuthenticationToken jwtToken) {
+        String username = jwtToken.getName();
+        User user = userRepo.findUserByUsername(username);
+
+        if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalStateException("Mật khẩu hiện tại không chính xác");
+        }
+
+        if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmationPassword())) {
+            throw new IllegalStateException("Mật khẩu mới và xác nhận mật khẩu không khớp");
+        }
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepo.save(user);
+        return changePasswordRequest;
+    }
 
     @Override
     public JwtResponse removeAuth(SignInFormRequest signInFormRequest) throws Exception {

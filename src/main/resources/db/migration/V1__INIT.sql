@@ -238,6 +238,8 @@ CREATE TABLE "user"
     balance      DECIMAL,
     deleted_date TIMESTAMP WITHOUT TIME ZONE,
     role_id      BIGINT,
+    otp_code     TEXT,
+    otp_expiry_time TIMESTAMP,
     CONSTRAINT pk_user PRIMARY KEY (id)
 );
 
