@@ -1,4 +1,13 @@
 spring:
+  profiles:
+    active: dev
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.security: DEBUG
+    org.hibernate: ERROR
+    dev.weebook.api: DEBUG
   datasource:
     url: jdbc:postgresql://localhost:5432/books
     username: khoi
@@ -13,3 +22,10 @@ app:
   key:
     public-key: classpath:key/publickey.pem
     private-key: classpath:key/privatekey.pem
+
+---
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Ho_Chi_Minh
+

@@ -23,5 +23,7 @@ public class SignUpFormRequest {
 
     private String lastNameUser;
 
+    private String emailUser;
+
     private Boolean genderUser;
 }

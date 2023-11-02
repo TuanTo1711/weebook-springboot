@@ -8,13 +8,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-
 import java.io.Serial;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Builder
@@ -65,14 +63,20 @@ public class User implements UserDetails {
     @Column(name = "balance")
     private BigDecimal balance;
 
+    @CreatedDate
+    private Instant created_At;
+
+    @LastModifiedDate
+    private Instant update_At;
+
     @Column(name = "deleted_date")
     private Instant deletedDate;
 
-//    @CreatedDate
-//    private Instant created_At;
-//
-//    @LastModifiedDate
-//    private Instant updated_At;
+    @Column(name = "otp_code", length = 4)
+    private String otpCode;
+
+    @Column(name = "otp_expiry_time")
+    private LocalDateTime otpExpiryTime;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id")
@@ -92,17 +96,17 @@ public class User implements UserDetails {
     @ToString.Exclude
     @Builder.Default
     private Set<Address> addresses = new LinkedHashSet<>();
-    @Builder.Default
+
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
-    @Builder.Default
+
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
     private Set<Voucher> vouchers = new LinkedHashSet<>();
-    @Builder.Default
+
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
@@ -163,6 +167,9 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        if (otpExpiryTime != null && otpExpiryTime.isBefore(LocalDateTime.now())) {
+            return false;
+        }
+        return otpCode == null || !otpCode.isEmpty();
     }
 }

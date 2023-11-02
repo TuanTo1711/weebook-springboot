@@ -7,7 +7,6 @@ import java.io.Serializable;
  */
 public record UserDto(
         String usernameUser,
-        String fullNameUser,
         String emailUser,
-        Boolean gender) implements Serializable {
+        Boolean gender, String firstName, String lastName) implements Serializable {
 }
