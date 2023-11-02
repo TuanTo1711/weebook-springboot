@@ -5,7 +5,7 @@ target/
 !**/src/test/**/target/
 /src/main/resources/db/migration/**
 /compose.yaml
-/src/main/resources/application.dev.yaml
+/src/main/resources/application-dev.yml
 * -text
 
 ### STS ###
