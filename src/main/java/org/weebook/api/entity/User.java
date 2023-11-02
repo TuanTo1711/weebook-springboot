@@ -3,6 +3,8 @@ package org.weebook.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -60,6 +62,12 @@ public class User implements UserDetails {
 
     @Column(name = "balance")
     private BigDecimal balance;
+
+    @CreatedDate
+    private Instant created_At;
+
+    @LastModifiedDate
+    private Instant update_At;
 
     @Column(name = "deleted_date")
     private Instant deletedDate;

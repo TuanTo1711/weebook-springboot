@@ -236,6 +236,8 @@ CREATE TABLE "user"
     avatar_url   TEXT,
     tier         TEXT,
     balance      DECIMAL,
+    created_At   TIMESTAMP,
+    update_At    TIMESTAMP,
     deleted_date TIMESTAMP WITHOUT TIME ZONE,
     role_id      BIGINT,
     otp_code     TEXT,

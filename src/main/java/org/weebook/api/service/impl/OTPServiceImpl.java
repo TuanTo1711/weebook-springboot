@@ -34,8 +34,12 @@ public class OTPServiceImpl implements OTPService {
     @Override
     public String generateOTP() {
         Random random = new Random();
-        int otp = 1000 + random.nextInt(9000);
-        return String.valueOf(otp);
+        StringBuilder otpBuilder = new StringBuilder();
+        for (int i = 0; i < 4; i++){
+            int randomNumber = random.nextInt(10);
+            otpBuilder.append(randomNumber);
+        }
+        return otpBuilder.toString();
     }
 
     @Override
