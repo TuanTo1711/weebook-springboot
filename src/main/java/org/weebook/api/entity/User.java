@@ -82,10 +82,11 @@ public class User implements UserDetails {
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
-    private Set<Transaction> transactions = new LinkedHashSet<>();
+    @OrderBy(value = "id desc")
+    private List<Transaction> transactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     @ToString.Exclude

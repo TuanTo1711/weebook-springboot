@@ -12,7 +12,6 @@ import org.weebook.api.dto.mapper.VoucherMapper;
 import org.weebook.api.entity.Notification;
 import org.weebook.api.entity.User;
 import org.weebook.api.entity.Voucher;
-import org.weebook.api.repository.OrderRepo;
 import org.weebook.api.repository.UserRepo;
 import org.weebook.api.repository.VoucherRepo;
 import org.weebook.api.service.VoucherService;

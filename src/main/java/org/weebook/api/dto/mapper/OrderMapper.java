@@ -30,6 +30,8 @@ public interface OrderMapper {
     UserDto entityUserToDto(User user);
 
     OrderDTO entityOrderToDto(Order order);
+    List<OrderDTO> entityOrderToDtos(List<Order> order);
+
     @Mapping(target = "order", source = "order")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "id", ignore = true)
