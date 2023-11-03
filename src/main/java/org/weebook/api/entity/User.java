@@ -87,7 +87,7 @@ public class User implements UserDetails {
     @Builder.Default
     private Set<Transaction> transactions = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
     private Set<Notification> notifications = new LinkedHashSet<>();
@@ -102,10 +102,14 @@ public class User implements UserDetails {
     @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
     private Set<Voucher> vouchers = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
+    @ToString.Exclude
+    private Set<Order> orders = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
