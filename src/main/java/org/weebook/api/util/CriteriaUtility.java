@@ -8,9 +8,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
+import org.weebook.api.exception.StringException;
 import org.weebook.api.web.request.FilterRequest;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -159,6 +164,38 @@ public class CriteriaUtility {
         };
     }
 
+    public static <T> Specification<T> buildFieldEqualsInstant(String field, Object value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+            Path<?> path = getPath(field, root);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            try {
+                Instant instant = Instant.from(formatter.parse((String)value));
+                return criteriaBuilder.equal(path, instant);
+            } catch (DateTimeParseException e) {
+                throw new StringException("Bạn nhập chuỗi sai");
+            }
+        };
+    }
+
+    public static <T> Specification<T> buildFieldEqualsLocaldate(String field, Object value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+            Path<?> path = getPath(field, root);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            try {
+                LocalDate localDate = LocalDate.parse((String)value, formatter);
+                return criteriaBuilder.equal(path, localDate);
+            } catch (DateTimeParseException e) {
+                throw new StringException("Bạn nhập chuỗi sai");
+            }
+        };
+    }
+
     public static <T> Specification<T> buildFieldRange(String field, Range<BigDecimal> range) {
         return (root, query, criteriaBuilder) -> {
             if (!StringUtils.hasText(field)) {
@@ -284,6 +321,9 @@ public class CriteriaUtility {
             case EQ -> {
                 return buildFieldEquals(filterRequest.getField(), filterRequest.getValue());
             }
+            case EQLCD -> {
+                return buildFieldEqualsLocaldate(filterRequest.getField(), filterRequest.getValue());
+            }
             case BETWEEN -> {
                 return buildFieldRange(filterRequest.getField(), getRange(filterRequest.getValue()));
             }
@@ -347,6 +387,7 @@ public class CriteriaUtility {
 
     public enum CriteriaType {
         EQ, // Equal
+        EQLCD, // Equal localdate
         LT, // Less Than
         GT, // Greater Than
         LE, // Less Than or Equal
