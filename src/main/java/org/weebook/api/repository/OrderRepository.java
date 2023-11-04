@@ -27,9 +27,9 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
     Page<Order> adminFindByStatus(String status, Pageable pageable);
 
 
-    @Query("""
-        select o from Order o join o.orderItems oi join oi.product p
-        where o.status = 'success' and o.orderDate = :orderDate
-    """)
-    List<TKProductDto> byOrder(Instant orderDate);
+//    @Query("""
+//        select o from Order o join o.orderItems oi join oi.product p
+//        where o.status = 'success' and o.orderDate = :orderDate
+//    """)
+//    List<TKProductDto> byOrder(Instant orderDate);
 }
