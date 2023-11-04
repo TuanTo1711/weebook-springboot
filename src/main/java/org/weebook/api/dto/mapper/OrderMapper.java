@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.weebook.api.dto.*;
 import org.weebook.api.entity.*;
+import org.weebook.api.web.request.OrderFeedBackRequest;
 import org.weebook.api.web.request.OrderItemRequest;
 import org.weebook.api.web.request.OrderRequest;
 
@@ -23,12 +24,20 @@ public interface OrderMapper {
 
 
     @Mapping(target = "orderItems", expression = "java(new LinkedHashSet<>())")
-    @Mapping(target = "orderStatuses", expression = "java(new LinkedHashSet<>())")
+    @Mapping(target = "orderStatuses", expression = "java(new ArrayList<>())")
+    @Mapping(target = "orderDate", expression = "java(Instant.now())")
     Order requestOrderToEntity(OrderRequest orderRequest);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "order", source = "order")
+    OrderFeedback requestOrderFeedBackToEntity(OrderFeedBackRequest orderFeedBackRequest, Order order);
+
+
+    OrderFeedBackDto entitiOrderFeedBackToDto(OrderFeedback orderFeedback);
 
     UserDto entityUserToDto(User user);
 
+    @Mapping(target = "orderFeedbacks", source = "order.orderFeedbacks", qualifiedByName = "orderfeedback")
     OrderDTO entityOrderToDto(Order order);
     List<OrderDTO> entityOrderToDtos(List<Order> order);
 
@@ -59,6 +68,15 @@ public interface OrderMapper {
             return product;
         }
         return null;
+    }
+
+    @Named("orderfeedback")
+    default OrderFeedBackDto orderfeedback(List<OrderFeedback> orderFeedbacks) {
+        if(orderFeedbacks.size() == 0){
+            return null;
+        }
+        OrderFeedback orderFeedback = orderFeedbacks.get(0);
+        return entitiOrderFeedBackToDto(orderFeedback);
     }
 
 }

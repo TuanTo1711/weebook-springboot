@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.weebook.api.dto.OrderDTO;
+import org.weebook.api.dto.OrderFeedBackDto;
 import org.weebook.api.dto.VoucherDTO;
 import org.weebook.api.dto.mapper.NotificationMapper;
 import org.weebook.api.dto.mapper.OrderMapper;
@@ -14,6 +15,7 @@ import org.weebook.api.repository.ProductRepository;
 import org.weebook.api.repository.UserRepo;
 import org.weebook.api.repository.VoucherRepo;
 import org.weebook.api.service.OrderService;
+import org.weebook.api.web.request.OrderFeedBackRequest;
 import org.weebook.api.web.request.OrderItemRequest;
 import org.weebook.api.web.request.OrderRequest;
 import org.weebook.api.web.request.UpdateStatusOrderRequest;
@@ -93,7 +95,6 @@ public class OrderServiceImpl implements OrderService {
         OrderStatus orderStatus = orderMapper.buildOrderStatus(order, updateStatusOrderRequest.getStatus());
         order.getOrderStatuses().add(orderStatus);
         User user = order.getUser();
-        System.out.println(message);
         Notification notification = notificationMapper.notification("Order",message, "order", user);
         user.getNotifications().add(notification);
 
@@ -113,6 +114,27 @@ public class OrderServiceImpl implements OrderService {
         userRepo.save(user);
 
         return orderMapper.entityOrderToDto(order);
+    }
+
+    @Override
+    public OrderFeedBackDto orderfeedback(OrderFeedBackRequest orderFeedBackRequest) {
+        Order order = orderRepository.findById(orderFeedBackRequest.getIdOrder()).orElse(null);
+        if(order == null){
+            throw new StringException("T đố m hack được.");
+        }
+
+        if (!order.getStatus().equals("success")){
+            throw new StringException("Đơn hàng chưa hoàn thành không thể đánh giá");
+        }
+
+        if(order.getOrderFeedbacks().size()>0){
+            throw new StringException("Bạn đã đánh gi rồi.");
+        }
+
+        OrderFeedback orderFeedback = orderMapper.requestOrderFeedBackToEntity(orderFeedBackRequest, order);
+        order.getOrderFeedbacks().add(orderFeedback);
+        orderRepository.save(order);
+        return orderMapper.entitiOrderFeedBackToDto(orderFeedback);
     }
 
     @Override

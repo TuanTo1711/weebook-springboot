@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UpdateStatusOrderRequest {
-    Long idUser;
 
     Long idOrder;
 

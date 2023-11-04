@@ -64,9 +64,10 @@ public class Order implements Serializable {
     @ToString.Exclude
     private List<Transaction> transactions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
     @ToString.Exclude
-    private Set<OrderFeedback> orderFeedbacks = new LinkedHashSet<>();
+    @OrderBy(value = "id desc")
+    private List<OrderFeedback> orderFeedbacks = new ArrayList<>();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
@@ -74,7 +75,8 @@ public class Order implements Serializable {
 
     @OneToMany(mappedBy = "order", cascade = {CascadeType.MERGE,CascadeType.REFRESH})
     @ToString.Exclude
-    private Set<OrderStatus> orderStatuses = new LinkedHashSet<>();
+    @OrderBy(value = "id desc")
+    private List<OrderStatus> orderStatuses = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id")

@@ -5,19 +5,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.weebook.api.dto.TKProductDto;
 import org.weebook.api.entity.Order;
 import org.weebook.api.entity.User;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order,Long> {
-    @Modifying
-    @Query("""
-        update Product p
-        set p.quantity = p.quantity + :quantity
-        where p.id = :id
-    """)
-    void orderCancel(Integer quantity, Long id);
 
     @Query("""
         select o from Order o
@@ -30,4 +25,11 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
         where o.status = :status
     """)
     Page<Order> adminFindByStatus(String status, Pageable pageable);
+
+
+    @Query("""
+        select o from Order o join o.orderItems oi join oi.product p
+        where o.status = 'success' and o.orderDate = :orderDate
+    """)
+    List<TKProductDto> byOrder(Instant orderDate);
 }

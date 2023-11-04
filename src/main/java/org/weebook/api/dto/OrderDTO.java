@@ -2,9 +2,11 @@ package org.weebook.api.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.weebook.api.entity.OrderFeedback;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
@@ -25,4 +27,5 @@ public class OrderDTO {
     Set<OrderStatusDTO> orderStatuses;
 
 
+    OrderFeedBackDto orderFeedbacks;
 }
