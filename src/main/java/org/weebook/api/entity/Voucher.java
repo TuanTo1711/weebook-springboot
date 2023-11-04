@@ -34,6 +34,9 @@ public class Voucher implements Serializable {
     @Column(name = "code", length = Integer.MAX_VALUE)
     private String code;
 
+    @Column(name = "condition")
+    private BigDecimal condition;
+
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;
 
@@ -45,6 +48,7 @@ public class Voucher implements Serializable {
 
     @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
+
 
     @Column(name = "created_date")
     @CreatedDate

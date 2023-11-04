@@ -10,20 +10,5 @@ spring:
     password: db-password
     driver-class-name: org.postgresql.Driver
   jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
----
-spring:
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: hoangtantuan03@gmail.com
-    password: fmjd ohww xhbg xqsf
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true

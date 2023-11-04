@@ -3,6 +3,7 @@ package org.weebook.api.exception.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,15 +11,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.weebook.api.exception.ErrorMessages;
+import org.weebook.api.exception.ErrorResponses;
+import org.weebook.api.exception.StringException;
 import org.weebook.api.exception.ValidationError;
 import org.weebook.api.exception.error.InsufficientFundsException;
 import org.weebook.api.web.response.ErrorResponse;
 import org.weebook.api.web.response.JwtResponse;
 import org.weebook.api.web.response.ResultResponse;
+import org.springframework.http.HttpStatus;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -65,6 +67,16 @@ public class GlobalExceptionHandler {
         return new ResultResponse<>(HttpStatus.UNAUTHORIZED.value(),
                 Objects.nonNull(ex.getLocalizedMessage()) ? ex.getLocalizedMessage() : ErrorMessages.INSUFFICIENT_FUNDS_ERROR,
                 null);
+    }
+
+    @ExceptionHandler(StringException.class)
+    public ResponseEntity<ErrorResponses> handleException(StringException ex) {
+        var errorResponse = ErrorResponses.builder()
+                .uuid(UUID.randomUUID())
+                .errors(Collections.singletonList(new org.weebook.api.exception.Error(HttpStatus.BAD_REQUEST, ex.getMessage())))
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
 

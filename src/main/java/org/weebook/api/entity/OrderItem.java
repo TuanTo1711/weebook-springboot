@@ -33,7 +33,7 @@ public class OrderItem implements Serializable {
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "order_id")
     private Order order;
 

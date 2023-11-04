@@ -89,12 +89,13 @@ public class User implements UserDetails {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Role role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
-    private Set<Transaction> transactions = new LinkedHashSet<>();
+    @OrderBy(value = "id desc")
+    private List<Transaction> transactions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
     private List<Notification> notifications = new ArrayList<>();
@@ -109,10 +110,14 @@ public class User implements UserDetails {
     @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
     private List<Voucher> vouchers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
+    @ToString.Exclude
+    private Set<Order> orders = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude

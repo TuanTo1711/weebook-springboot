@@ -9,9 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Builder
 @AllArgsConstructor
@@ -31,11 +29,16 @@ public class Order implements Serializable {
     @Column(name = "id", nullable = false)
     private Long id;
 
+
+    @CreatedDate
     @Column(name = "order_date")
     private Instant orderDate;
 
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
+
+    @Column(name = "total_discount")
+    private BigDecimal totalDiscount;
 
     @Column(name = "delivery_address", length = Integer.MAX_VALUE)
     private String deliveryAddress;
@@ -49,34 +52,35 @@ public class Order implements Serializable {
     @Column(name = "delivery_status", length = Integer.MAX_VALUE)
     private String deliveryStatus;
 
-    @Column(name = "created_date")
-    @CreatedDate
-    private Instant createdDate;
+    @Column(name = "status", length = Integer.MAX_VALUE)
+    private String status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
-    @Builder.Default
     private Set<Payment> payments = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "order")
     @ToString.Exclude
-    @Builder.Default
-    private Set<Transaction> transactions = new LinkedHashSet<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
     @ToString.Exclude
-    @Builder.Default
-    private Set<OrderFeedback> orderFeedbacks = new LinkedHashSet<>();
+
+    @OrderBy(value = "id desc")
+    private List<OrderFeedback> orderFeedbacks = new ArrayList<>();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
-    @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @ToString.Exclude
-    @Builder.Default
-    private Set<OrderStatus> orderStatuses = new LinkedHashSet<>();
+    @OrderBy(value = "id desc")
+    private List<OrderStatus> orderStatuses = new ArrayList<>();
+
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Override
     public final boolean equals(Object o) {

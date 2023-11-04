@@ -15,6 +15,9 @@ spring:
         jdbc:
           batch_size: 1000
           batch_versioned_data: true
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Ho_Chi_Minh
 logging:
   level:
     root: INFO
@@ -28,9 +31,3 @@ app:
   keys:
     public-key: classpath:key/public-key.pem
     private-key: classpath:key/private-key.pem
-
----
-spring:
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: Asia/Ho_Chi_Minh
