@@ -2,9 +2,11 @@ package org.weebook.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.weebook.api.dto.OrderDTO;
 import org.weebook.api.dto.OrderFeedBackDto;
+import org.weebook.api.dto.TKProductDto;
 import org.weebook.api.dto.VoucherDTO;
 import org.weebook.api.dto.mapper.NotificationMapper;
 import org.weebook.api.dto.mapper.OrderMapper;
@@ -15,14 +17,13 @@ import org.weebook.api.repository.ProductRepository;
 import org.weebook.api.repository.UserRepo;
 import org.weebook.api.repository.VoucherRepo;
 import org.weebook.api.service.OrderService;
-import org.weebook.api.web.request.OrderFeedBackRequest;
-import org.weebook.api.web.request.OrderItemRequest;
-import org.weebook.api.web.request.OrderRequest;
-import org.weebook.api.web.request.UpdateStatusOrderRequest;
+import org.weebook.api.util.CriteriaUtility;
+import org.weebook.api.web.request.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -147,6 +148,11 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderDTO> adminFindByStatus(String status, Integer page) {
         List<Order> orders = orderRepository.adminFindByStatus(status, PageRequest.of(page-1,5)).getContent();
         return orderMapper.entityOrderToDtos(orders);
+    }
+
+    @Override
+    public List<TKProductDto> tkByOrder() {
+        return null;
     }
 
     Transaction transaction(Order order){
