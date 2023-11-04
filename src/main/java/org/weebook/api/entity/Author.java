@@ -32,8 +32,9 @@ public class Author implements Serializable {
     @Column(name = "biography", length = Integer.MAX_VALUE)
     private String biography;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
+    @ToString.Exclude
     private Product product;
 
     @Override

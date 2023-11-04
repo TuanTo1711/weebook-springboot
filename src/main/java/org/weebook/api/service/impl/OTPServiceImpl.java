@@ -1,41 +1,42 @@
 package org.weebook.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.weebook.api.entity.User;
-import org.weebook.api.repository.UserRepo;
+import org.weebook.api.repository.UserRepository;
 import org.weebook.api.service.OTPService;
 import org.weebook.api.util.EmailSender;
 import org.weebook.api.web.response.ResultResponse;
+
 import java.time.LocalDateTime;
 import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class OTPServiceImpl implements OTPService {
-    private final UserRepo userRepo;
+    private final Random random = new Random();
+    private final UserRepository userRepository;
     private final EmailSender emailSender;
 
     @Override
     public void generateAndSendOTP(String username) {
-        User user = userRepo.findUserByUsername(username);
+        var optional = userRepository.findByUsername(username);
 
-        if (user != null) {
+        if (optional.isPresent()) {
+            User user = optional.get();
             String otp = generateOTP();
             user.setOtpCode(otp);
             user.setOtpExpiryTime(LocalDateTime.now().plusMinutes(5));
-            System.out.println(user.getOtpExpiryTime());
-            userRepo.save(user);
+            userRepository.saveAndFlush(user);
             emailSender.sendOTPByEmail(user.getEmail(), otp);
         }
     }
 
     @Override
     public String generateOTP() {
-        Random random = new Random();
+
         StringBuilder otpBuilder = new StringBuilder();
-        for (int i = 0; i < 4; i++){
+        for (int i = 0; i < 4; i++) {
             int randomNumber = random.nextInt(10);
             otpBuilder.append(randomNumber);
         }
@@ -48,47 +49,38 @@ public class OTPServiceImpl implements OTPService {
     }
 
     @Override
-    public ResultResponse verifyOtp(String email, String otp) {
-        User user = userRepo.findByEmail(email);
+    public String verifyOtp(String email, String otp) {
+        var optional = userRepository.findByEmail(email);
 
-        if (user == null) {
-            return ResultResponse.builder()
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .message("Invalid Email !")
-                    .build();
+        if (optional.isEmpty()) {
+            return "Invalid Email !";
         }
 
+        User user = optional.get();
         if (!user.getOtpCode().equals(otp)) {
-            return ResultResponse.builder()
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .message("Invalid OTP !")
-                    .build();
+            return "Invalid OTP !";
 
         }
-        if (!user.isEnabled()) {
-            return ResultResponse.builder()
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .message("OTP has expired")
-                    .build();
+        if (user.getOtpExpiryTime().isBefore(LocalDateTime.now())) {
+            return "OTP Expired";
         }
 
         user.setOtpCode(null);
-        userRepo.save(user);
-        return ResultResponse.builder()
-                .data(HttpStatus.OK.value())
-                .message("OTP verified successfully")
-                .build();
+        user.setOtpExpiryTime(null);
+        userRepository.save(user);
+        return "OTP verified successfully";
     }
 
     @Override
     public ResultResponse refreshOtpExpired(String email) {
-        User user = userRepo.findByEmail(email);
-        if(user !=null && user.getOtpExpiryTime().isBefore(LocalDateTime.now())){
+        var optional = userRepository.findByEmail(email);
+        if (optional.isPresent() && optional.get().getOtpExpiryTime().isBefore(LocalDateTime.now())) {
+            User user = optional.get();
             String newOtp = generateOTP();
             user.setOtpCode(newOtp);
             user.setOtpExpiryTime(LocalDateTime.now().plusMinutes(15));
-            userRepo.save(user);
-            emailSender.sendOTPByEmail(email,newOtp);
+            userRepository.save(user);
+            emailSender.sendOTPByEmail(email, newOtp);
         }
         return null;
     }

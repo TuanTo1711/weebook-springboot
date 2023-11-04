@@ -112,8 +112,9 @@ public class Product implements Serializable {
     @Column(name = "updated_date")
     private Instant updatedDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
+    @ToString.Exclude
     private Category category;
 
     @ManyToOne
@@ -124,7 +125,7 @@ public class Product implements Serializable {
     @JoinColumn(name = "event_id")
     private Event event;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
     @ToString.Exclude
     @Builder.Default
     private List<Author> authors = new LinkedList<>();
@@ -137,19 +138,21 @@ public class Product implements Serializable {
     @Builder.Default
     private List<Genre> genres = new LinkedList<>();
 
-    @ElementCollection
-    @Column(name = "image_url")
-    @CollectionTable(name = "products_image", joinColumns = @JoinColumn(name = "products_id"))
+    @OneToMany(mappedBy = "products", orphanRemoval = true)
     @Builder.Default
-    private Set<String> images = new LinkedHashSet<>();
+    @ToString.Exclude
+    private Set<ProductsImage> images = new LinkedHashSet<>();
+
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
     @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
+
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
     @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
+
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
     @Builder.Default

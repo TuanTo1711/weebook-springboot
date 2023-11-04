@@ -1,31 +1,36 @@
 spring:
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    baseline-on-migrate: true
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        jdbc:
+          batch_size: 1000
+          batch_versioned_data: true
 logging:
   level:
     root: INFO
     org.springframework: INFO
     org.springframework.security: DEBUG
     org.hibernate: ERROR
-    dev.weebook.api: DEBUG
-  datasource:
-    url: jdbc:postgresql://localhost:5432/books
-    username: khoi
-    password: 123
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
+    dev.weebook.api: INFO
+    sql: trace
+
 app:
-  key:
-    public-key: classpath:key/publickey.pem
-    private-key: classpath:key/privatekey.pem
+  keys:
+    public-key: classpath:key/public-key.pem
+    private-key: classpath:key/private-key.pem
 
 ---
 spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Ho_Chi_Minh
-

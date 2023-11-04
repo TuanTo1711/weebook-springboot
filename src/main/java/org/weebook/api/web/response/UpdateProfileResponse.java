@@ -10,7 +10,7 @@ import org.weebook.api.dto.UserDto;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateFormResponse {
+public class UpdateProfileResponse {
     UserDto userOld;
     UserDto userNew;
 }

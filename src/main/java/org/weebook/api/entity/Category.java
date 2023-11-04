@@ -7,7 +7,9 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Builder
 @AllArgsConstructor
@@ -30,15 +32,16 @@ public class Category implements Serializable {
     @Column(name = "name", length = Integer.MAX_VALUE)
     private String name;
 
-    @ManyToOne
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_category_id")
+    @JsonIgnore
+    @ToString.Exclude
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
     @ToString.Exclude
     @Builder.Default
-    private List<Category> children = new LinkedList<>();
+    private List<Category> children = new ArrayList<>();
 
     @Override
     public final boolean equals(Object o) {

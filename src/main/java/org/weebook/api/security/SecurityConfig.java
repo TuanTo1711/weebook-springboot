@@ -29,6 +29,7 @@ import org.weebook.api.config.KeyConfig;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final KeyConfig keyConfig;
 
     @Bean
@@ -43,33 +44,26 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(source);
     }
 
-
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> {
-                    request.requestMatchers(HttpMethod.POST,"api/v1/auth/**").permitAll()
-                            .requestMatchers(HttpMethod.GET,"api/v1/auth/**").hasAuthority("read")
-                            .requestMatchers(HttpMethod.GET, "/api/otp/**").permitAll()
-                            .requestMatchers(HttpMethod.POST, "/api/otp/**").permitAll()
-                            .anyRequest().authenticated();
-
-//                    request.requestMatchers(HttpMethod.POST,"api/v*/auth/**").hasAuthority("read");
-
-
-                }).sessionManagement(sessionManager -> {
-                    sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                })
-                .oauth2ResourceServer(oauth -> {
-                    oauth.jwt(jwt ->
-                            jwt.decoder(jwtDecoder())
-                    );
-                });
-
-        return httpSecurity
-                .build();
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(HttpMethod.POST, "api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/v1/auth/**").hasAuthority("read")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/category/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/otp/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/otp/**").permitAll()
+                        .anyRequest().authenticated())
+                .sessionManagement(sessionManager -> sessionManager
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(oauth -> oauth
+                        .jwt(jwt -> jwt
+                                .decoder(jwtDecoder())
+                        ));
+        return httpSecurity.build();
     }
 
     @Bean
@@ -92,7 +86,7 @@ public class SecurityConfig {
     DaoAuthenticationProvider daoAuthenticationProvider(
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder
-    ){
+    ) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);

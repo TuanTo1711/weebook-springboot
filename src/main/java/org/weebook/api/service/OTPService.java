@@ -9,7 +9,7 @@ public interface OTPService {
 
     void sendOTPByEmail(String email, String otp);
 
-    ResultResponse verifyOtp( String email , String otp);
+    String verifyOtp(String email, String otp);
 
     ResultResponse refreshOtpExpired(String email);
 
