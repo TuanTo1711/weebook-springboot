@@ -45,8 +45,5 @@ public class OrderController {
         return orderService.adminFindByStatus(status, page);
     }
 
-//    @GetMapping("/tk/by/order")
-//    public List<TKProductDto> userFindByStatus(@Param("status") String status, @Param("page") Integer page){
-//        return orderService.adminFindByStatus(status, page);
-//    }
+
 }
