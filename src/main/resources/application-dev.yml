@@ -5,30 +5,10 @@ spring:
 ---
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/test_db
-    username: myuser
-    password: secret
-
+    url: jdbc:postgresql://localhost:5432/db-schema
+    username: db-user
+    password: db-password
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
----
-spring:
-  mvc:
-    validation:
-      enabled: true
-
----
-spring:
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: doanhuynhduycuong16011601@gmail.com
-    password: fulmkibjsaxhprzb
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true

@@ -1,5 +1,7 @@
 package org.weebook.api.util;
 
+import com.github.slugify.Slugify;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import org.springframework.data.domain.Range;
@@ -31,6 +33,8 @@ import static org.springframework.data.domain.Sort.Direction.fromString;
  */
 public class CriteriaUtility {
 
+    private static final Slugify slugify = Slugify.builder().build();
+
     private CriteriaUtility() {
     }
 
@@ -59,8 +63,7 @@ public class CriteriaUtility {
                 return null;
             }
             Path<String> path = getPath(field, root);
-            return criteriaBuilder
-                    .like(criteriaBuilder.lower(path), value.toLowerCase());
+            return criteriaBuilder.like(criteriaBuilder.lower(path), value.toLowerCase());
         };
     }
 
@@ -91,48 +94,6 @@ public class CriteriaUtility {
 
             Path<String> path = getPath(field, root);
             return criteriaBuilder.like(criteriaBuilder.lower(path), "%" + value.toLowerCase() + "%");
-        };
-    }
-
-    public static <T> Specification<T> buildFieldSearch(String field, String value) {
-        return (root, query, criteriaBuilder) -> {
-            if (!StringUtils.hasText(field)) {
-                return null;
-            }
-
-            StringBuilder values = new StringBuilder();
-
-            if (!StringUtils.containsWhitespace(value.trim()) || value.length() <= 1) {
-                values.append(value);
-            } else {
-                values.append(StringUtils.replace(value, " ", "%"));
-            }
-
-            Path<String> path = getPath(field, root);
-            return criteriaBuilder.like(criteriaBuilder.lower(path),
-                    "%" + values.toString().toLowerCase() + "%");
-        };
-    }
-
-    public static <T> Specification<T> buildFieldLikeLeading(String field, String value) {
-        return (root, query, criteriaBuilder) -> {
-            if (!StringUtils.hasText(field)) {
-                return null;
-            }
-
-            Path<String> path = getPath(field, root);
-            return criteriaBuilder.like(criteriaBuilder.lower(path), value.toLowerCase() + "%");
-        };
-    }
-
-    public static <T> Specification<T> buildFieldGE(String field, Integer value) {
-        return (root, query, criteriaBuilder) -> {
-            if (!StringUtils.hasText(field)) {
-                return null;
-            }
-
-            Path<Integer> path = getPath(field, root);
-            return criteriaBuilder.greaterThanOrEqualTo(path, value);
         };
     }
 
@@ -195,20 +156,6 @@ public class CriteriaUtility {
             }
         };
     }
-
-    public static <T> Specification<T> buildFieldRange(String field, Range<BigDecimal> range) {
-        return (root, query, criteriaBuilder) -> {
-            if (!StringUtils.hasText(field)) {
-                return null;
-            }
-
-            Path<BigDecimal> path = getPath(field, root);
-            return criteriaBuilder.between(path,
-                    range.getLowerBound().getValue().get(),
-                    range.getUpperBound().getValue().get());
-        };
-    }
-
     /**
      * Builds a Specification to select specific fields from the records.
      *
@@ -298,6 +245,61 @@ public class CriteriaUtility {
 
         return Sort.by(field);
     }
+    
+    public static <T> Specification<T> buildFieldSearch(String field, String value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+
+            StringBuilder values = new StringBuilder();
+
+            if (!StringUtils.containsWhitespace(value.trim()) || value.length() <= 1) {
+                values.append(value);
+            } else {
+                values.append(StringUtils.replace(value, " ", "%"));
+            }
+
+            Path<String> path = getPath(field, root);
+            return criteriaBuilder.like(criteriaBuilder.lower(path),
+                    "%" + values.toString().toLowerCase() + "%");
+        };
+    }
+
+    public static <T> Specification<T> buildFieldLikeLeading(String field, String value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+
+            Path<String> path = getPath(field, root);
+            return criteriaBuilder.like(criteriaBuilder.lower(path), value.toLowerCase() + "%");
+        };
+    }
+
+    public static <T> Specification<T> buildFieldGE(String field, Integer value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+
+            Path<Integer> path = getPath(field, root);
+            return criteriaBuilder.greaterThanOrEqualTo(path, value);
+        };
+    }
+
+    public static <T> Specification<T> buildFieldRange(String field, Range<BigDecimal> range) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+
+            Path<BigDecimal> path = getPath(field, root);
+            return criteriaBuilder.between(path,
+                    range.getLowerBound().getValue().get(),
+                    range.getUpperBound().getValue().get());
+        };
+    }
 
     public static <T> Specification<T> toSpecification(FilterRequest filterRequest) {
         String type = filterRequest.getType();
@@ -330,8 +332,22 @@ public class CriteriaUtility {
             case GE -> {
                 return buildFieldGE(filterRequest.getField(), NumberUtils.parseNumber(filterRequest.getValue(), Integer.class));
             }
+            case SLUG -> {
+                return buildFieldSlug(filterRequest.getField(), filterRequest.getValue());
+            }
             default -> throw new IllegalArgumentException("Criteria Type: '%s' is not supported".formatted(type));
         }
+    }
+
+    public static <T> Specification<T> buildFieldSlug(String field, String value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field) || !StringUtils.hasText(value)) {
+                return null;
+            }
+
+            Path<String> path = getPath(field, root);
+            return criteriaBuilder.like(toSlug(criteriaBuilder, path), slugify.slugify(value));
+        };
     }
 
     private static <T> Specification<T> buildFieldUUID(String field, String value) {
@@ -385,6 +401,14 @@ public class CriteriaUtility {
         return getRange(value, "_|-");
     }
 
+    private static Expression<String> toSlug(CriteriaBuilder criteriaBuilder, Expression<String> path) {
+        return criteriaBuilder.function(
+                "public.slugify",
+                String.class,
+                path
+        );
+    }
+
     public enum CriteriaType {
         EQ, // Equal
         EQLCD, // Equal localdate
@@ -394,6 +418,6 @@ public class CriteriaUtility {
         GE, // Greater Than or Equal
         LIKE, // Like (for text search)
         LIKE_ANY,
-        UID, BETWEEN
+        UID, SLUG, BETWEEN
     }
 }

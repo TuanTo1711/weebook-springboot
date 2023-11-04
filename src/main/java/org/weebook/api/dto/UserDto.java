@@ -1,12 +1,17 @@
 package org.weebook.api.dto;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
- * DTO for {@link dev.weebook.api.entity.User}
+ * DTO for {@link org.weebook.api.entity.User}
  */
 public record UserDto(
-        String usernameUser,
-        String emailUser,
-        Boolean gender, String firstName, String lastName) implements Serializable {
+        String username,
+        String email,
+        String firstName,
+        String lastName,
+        Boolean gender,
+        LocalDate birthday,
+        String avatarUrl) implements Serializable {
 }

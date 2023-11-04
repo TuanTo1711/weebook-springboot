@@ -1,6 +1,7 @@
 package org.weebook.api.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -9,24 +10,23 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.weebook.api.dto.ProductDto;
 import org.weebook.api.dto.mapper.ProductMapper;
-import org.weebook.api.entity.Category;
 import org.weebook.api.entity.Product;
 import org.weebook.api.repository.ProductRepository;
 import org.weebook.api.service.ProductService;
 import org.weebook.api.util.CriteriaUtility;
-import org.weebook.api.web.request.FilterRequest;
 import org.weebook.api.web.request.PagingRequest;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+
+import static org.weebook.api.util.CriteriaUtility.*;
 
 @Service
 @AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
+
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-
 
     @Override
     public ProductDto saveProduct(ProductDto productDto) {
@@ -35,8 +35,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageImpl<ProductDto> findAll(PagingRequest pagingRequest) {
-        Specification<Product> specification = CriteriaUtility.getSpecification(pagingRequest.getFilters());
+    public PageImpl<ProductDto> getAll(PagingRequest pagingRequest) {
+        Specification<Product> specification = getSpecification(pagingRequest.getFilters());
         Page<Product> page = productRepository.findAll(specification, buildPageable(pagingRequest));
         return (PageImpl<ProductDto>) page.map(productMapper::toDto);
     }
@@ -54,33 +54,32 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDto> saveListProduct(List<ProductDto> booksDTO) {
-        List<Product> productList = productMapper.ListToEntity(booksDTO);
-        return productMapper.ListToDto(productRepository.saveAll(productList));
+        List<Product> productList = productMapper.listToEntity(booksDTO);
+        return productMapper.listToDto(productRepository.saveAll(productList));
     }
 
-
     @Override
-    public PageImpl<ProductDto> filterProducts(Long id, PagingRequest pagingRequest) {
-        FilterRequest filterRequest = new FilterRequest("category.id",id.toString(),"EQ");
-        pagingRequest.getFilters().add(filterRequest);
-        Specification<Product> specification = CriteriaUtility.getSpecification(pagingRequest.getFilters());
+    @Cacheable(value = "filterProducts", key = "#categoryName + #pagingRequest.toString()")
+    public PageImpl<ProductDto> filterProducts(String categoryName, PagingRequest pagingRequest) {
+        Specification<Product> specification = CriteriaUtility
+                .<Product>buildFieldSlug("category.name", categoryName)
+                .and(getSpecification(pagingRequest.getFilters()));
         Page<Product> products = productRepository.findAll(specification, buildPageable(pagingRequest));
         return (PageImpl<ProductDto>) products.map(productMapper::toDto);
     }
 
-
     @Override
-    public PageImpl<ProductDto> findByName(PagingRequest pagingRequest, String name) {
-        Specification<Product> specification = CriteriaUtility.buildFieldLikeAny("name", name);
-        Page<Product> products = productRepository.findAll(specification, buildPageable(pagingRequest));
-        return (PageImpl<ProductDto>) products.map(productMapper::toDto);
+    public List<ProductDto> findByName(String name) {
+        Specification<Product> specification = buildFieldSearch("name", name);
+        var products = productRepository.findAll(specification);
+        return productMapper.listToDto(products);
     }
 
     @Override
     public List<ProductDto> findByNameSuggest(String name) {
-        Specification<Product> specification = CriteriaUtility.buildFieldSearch("name", name);
+        Specification<Product> specification = buildFieldLikeLeading("name", name);
         List<Product> products = productRepository.findAll(specification);
-        return productMapper.ListToDto(products);
+        return productMapper.listToDto(products);
     }
 
 
@@ -88,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
         return PageRequest.of(
                 pagingRequest.getPageNumber(),
                 pagingRequest.getPageSize(),
-                CriteriaUtility.buildSort(pagingRequest.getSortBy(), pagingRequest.getSortType())
+                buildSort(pagingRequest.getSortBy(), pagingRequest.getSortType())
         );
     }
 

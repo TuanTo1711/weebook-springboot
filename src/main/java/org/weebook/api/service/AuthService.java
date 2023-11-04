@@ -1,22 +1,22 @@
 package org.weebook.api.service;
 
 
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.weebook.api.dto.UserDto;
 import org.weebook.api.web.request.ChangePasswordRequest;
-import org.weebook.api.web.request.SignInFormRequest;
-import org.weebook.api.web.request.SignUpFormRequest;
+import org.weebook.api.web.request.SignInRequest;
+import org.weebook.api.web.request.SignUpRequest;
 import org.weebook.api.web.response.JwtResponse;
-import org.weebook.api.web.response.SignUpFormResponse;
-import org.weebook.api.web.response.UpdateFormResponse;
+import org.weebook.api.web.response.UpdateProfileResponse;
 
 public interface AuthService {
-    JwtResponse loginAuth(SignInFormRequest signInFormRequest) throws Exception;
-    SignUpFormResponse signUpAuth(SignUpFormRequest signUpFormRequest) throws Exception;
+    JwtResponse login(SignInRequest signInRequest);
 
-    UpdateFormResponse updateProfile(UserDto userDto, Long id);
+    UserDto register(SignUpRequest signUpRequest);
 
-    ChangePasswordRequest changePassword(ChangePasswordRequest changePasswordRequest, JwtAuthenticationToken jwtToken);
-    JwtResponse removeAuth(SignInFormRequest signInFormRequest) throws Exception;
+    UpdateProfileResponse updateProfile(UserDto userDto);
+
+    void changePassword(ChangePasswordRequest changePasswordRequest);
+
+    JwtResponse removeAuth(SignInRequest signInRequest);
 
 }

@@ -16,6 +16,4 @@ public interface CategoryMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Category partialUpdate(CategoryDto categoryDto, @MappingTarget Category category);
-
-
 }

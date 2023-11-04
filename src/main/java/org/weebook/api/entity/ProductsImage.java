@@ -15,51 +15,22 @@ import java.util.Objects;
 @Setter
 @ToString
 @Entity
-@Table(name = "address")
-public class Address implements Serializable {
-
+@Table(name = "products_image")
+public class ProductsImage implements Serializable {
     @Serial
-    private static final long serialVersionUID = -962621168823401500L;
-
+    private static final long serialVersionUID = 1522004826996428255L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "street", length = Integer.MAX_VALUE)
-    private String street;
-
-    @Column(name = "city", length = Integer.MAX_VALUE)
-    private String city;
-
-    @Column(name = "state_province", length = Integer.MAX_VALUE)
-    private String stateProvince;
-
-    @Column(name = "country", length = Integer.MAX_VALUE)
-    private String country;
-
-    @Column(name = "zip_code", length = Integer.MAX_VALUE)
-    private String zipCode;
-
-    @Column(name = "first_name", length = Integer.MAX_VALUE)
-    private String firstName;
-
-    @Column(name = "last_name", length = Integer.MAX_VALUE)
-    private String lastName;
-
-    @Column(name = "phone_number")
-    private String phoneNumber;
-
-    @Column(name = "is_default_shipping")
-    private Boolean isDefaultShipping;
-
-    @Column(name = "is_default_billing")
-    private Boolean isDefaultBilling;
+    @Column(name = "image_url", length = Integer.MAX_VALUE)
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "products_id")
     @ToString.Exclude
-    private User user;
+    private Product products;
 
     @Override
     public final boolean equals(Object o) {
@@ -72,7 +43,7 @@ public class Address implements Serializable {
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Address entity = (Address) o;
+        ProductsImage entity = (ProductsImage) o;
         return getId() != null && Objects.equals(getId(), entity.getId());
     }
 
@@ -82,5 +53,4 @@ public class Address implements Serializable {
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : getClass().hashCode();
     }
-
 }

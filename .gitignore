@@ -24,7 +24,6 @@ target/
 *.ipr
 .jpb
 
-
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
