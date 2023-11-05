@@ -2,8 +2,6 @@ spring:
   config:
     activate:
       on-profile: dev
----
-spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/db-schema
     username: db-user
