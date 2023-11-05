@@ -10,7 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.Serial;
 import java.math.BigDecimal;
@@ -89,7 +89,7 @@ public class User implements UserDetails {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Role role;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
     @OrderBy(value = "id desc")
@@ -117,6 +117,7 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     @ToString.Exclude
+    @Builder.Default
     private Set<Order> orders = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
@@ -157,7 +158,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return ObjectUtils.isEmpty(otpCode);
+        return StringUtils.hasText(otpCode);
     }
 
     @Override

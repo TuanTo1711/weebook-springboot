@@ -2,10 +2,7 @@ package org.weebook.api.dto.mapper;
 
 import org.mapstruct.*;
 import org.weebook.api.dto.ProductDto;
-import org.weebook.api.entity.Author;
-import org.weebook.api.entity.Genre;
-import org.weebook.api.entity.Product;
-import org.weebook.api.entity.ProductsImage;
+import org.weebook.api.entity.*;
 
 import java.util.List;
 
@@ -21,6 +18,10 @@ public interface ProductMapper {
     default void linkReviews(@MappingTarget Product product) {
         product.getReviews().forEach(review -> review.setProduct(product));
     }
+
+    @Mapping(target = "name", expression = "java( review.getUser().getFirstName() + \" \" + review.getUser().getLastName() )")
+    @Mapping(target = "avatar", source = "user.avatarUrl")
+    ProductDto.ReviewDto toReviewDto(Review review);
 
     @InheritConfiguration
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

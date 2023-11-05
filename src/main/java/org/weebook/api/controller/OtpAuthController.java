@@ -22,7 +22,7 @@ public class OtpAuthController {
                 .build();
     }
 
-    @PostMapping("/refresh-otp-expired")
+    @GetMapping("/refresh-otp-expired")
     public ResultResponse refreshOtp(@RequestParam String email) {
         otpService.refreshOtpExpired(email);
         return ResultResponse.builder()

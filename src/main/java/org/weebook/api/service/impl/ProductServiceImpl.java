@@ -1,7 +1,7 @@
 package org.weebook.api.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +13,6 @@ import org.weebook.api.dto.mapper.ProductMapper;
 import org.weebook.api.entity.Product;
 import org.weebook.api.repository.ProductRepository;
 import org.weebook.api.service.ProductService;
-import org.weebook.api.util.CriteriaUtility;
 import org.weebook.api.web.request.PagingRequest;
 
 import java.util.List;
@@ -23,6 +22,7 @@ import static org.weebook.api.util.CriteriaUtility.*;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -59,13 +59,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(value = "filterProducts", key = "#categoryName + #pagingRequest.toString()")
     public PageImpl<ProductDto> filterProducts(String categoryName, PagingRequest pagingRequest) {
-        Specification<Product> specification = CriteriaUtility
-                .<Product>buildFieldSlug("category.name", categoryName)
-                .and(getSpecification(pagingRequest.getFilters()));
-        Page<Product> products = productRepository.findAll(specification, buildPageable(pagingRequest));
-        return (PageImpl<ProductDto>) products.map(productMapper::toDto);
+        Pageable pageable = buildPageable(pagingRequest);
+        Specification<Product> specification = getSpecification(pagingRequest.getFilters());
+        List<Product> products = productRepository.findAllRecursive(categoryName);
+
+        List<Product> filterResult = productRepository.findAll(specification);
+
+        List<Product> finalResult = products.stream().filter(filterResult::contains).toList();
+        PageImpl<Product> page = new PageImpl<>(finalResult, pageable, finalResult.size());
+        return (PageImpl<ProductDto>) page.map(productMapper::toDto);
     }
 
     @Override

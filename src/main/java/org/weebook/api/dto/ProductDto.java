@@ -44,8 +44,8 @@ public record ProductDto(
      */
 
     public record ReviewDto(
-            UserDto user,
-            ProductDto product,
+            String name,
+            String avatar,
             Integer rating,
             String comment,
             Instant createdAt) implements Serializable {

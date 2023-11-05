@@ -130,10 +130,11 @@ public class Product implements Serializable {
     @Builder.Default
     private List<Author> authors = new LinkedList<>();
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany
     @JoinTable(name = "product_genres",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "genres_id"))
+//    @ManyToMany(mappedBy = "products")
     @ToString.Exclude
     @Builder.Default
     private List<Genre> genres = new LinkedList<>();

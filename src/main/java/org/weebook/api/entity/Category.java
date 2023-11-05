@@ -1,5 +1,6 @@
 package org.weebook.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,6 +9,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +37,7 @@ public class Category implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_category_id")
     @JsonIgnore
+    @JsonBackReference
     @ToString.Exclude
     private Category parent;
 
@@ -42,6 +45,10 @@ public class Category implements Serializable {
     @ToString.Exclude
     @Builder.Default
     private List<Category> children = new ArrayList<>();
+
+    @OneToMany(mappedBy = "category")
+    @Builder.Default
+    private List<Product> products = new LinkedList<>();
 
     @Override
     public final boolean equals(Object o) {

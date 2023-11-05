@@ -133,7 +133,7 @@ public class CriteriaUtility {
             Path<?> path = getPath(field, root);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             try {
-                Instant instant = Instant.from(formatter.parse((String)value));
+                Instant instant = Instant.from(formatter.parse((String) value));
                 return criteriaBuilder.equal(path, instant);
             } catch (DateTimeParseException e) {
                 throw new StringException("Bạn nhập chuỗi sai");
@@ -141,7 +141,7 @@ public class CriteriaUtility {
         };
     }
 
-    public static <T> Specification<T> buildFieldEqualsLocaldate(String field, Object value) {
+    public static <T> Specification<T> buildFieldEqualsLocalDate(String field, Object value) {
         return (root, query, criteriaBuilder) -> {
             if (!StringUtils.hasText(field)) {
                 return null;
@@ -149,13 +149,14 @@ public class CriteriaUtility {
             Path<?> path = getPath(field, root);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             try {
-                LocalDate localDate = LocalDate.parse((String)value, formatter);
+                LocalDate localDate = LocalDate.parse((String) value, formatter);
                 return criteriaBuilder.equal(path, localDate);
             } catch (DateTimeParseException e) {
                 throw new StringException("Bạn nhập chuỗi sai");
             }
         };
     }
+
     /**
      * Builds a Specification to select specific fields from the records.
      *
@@ -245,7 +246,7 @@ public class CriteriaUtility {
 
         return Sort.by(field);
     }
-    
+
     public static <T> Specification<T> buildFieldSearch(String field, String value) {
         return (root, query, criteriaBuilder) -> {
             if (!StringUtils.hasText(field)) {
@@ -324,7 +325,7 @@ public class CriteriaUtility {
                 return buildFieldEquals(filterRequest.getField(), filterRequest.getValue());
             }
             case EQLCD -> {
-                return buildFieldEqualsLocaldate(filterRequest.getField(), filterRequest.getValue());
+                return buildFieldEqualsLocalDate(filterRequest.getField(), filterRequest.getValue());
             }
             case BETWEEN -> {
                 return buildFieldRange(filterRequest.getField(), getRange(filterRequest.getValue()));

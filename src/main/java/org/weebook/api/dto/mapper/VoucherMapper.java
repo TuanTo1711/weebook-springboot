@@ -3,8 +3,8 @@ package org.weebook.api.dto.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 import org.weebook.api.dto.VoucherDTO;
-import org.weebook.api.entity.Product;
 import org.weebook.api.entity.User;
 import org.weebook.api.entity.Voucher;
 import org.weebook.api.web.request.VoucherRequest;
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Mapper(componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
         imports = {UUID.class, Instant.class, List.class, ArrayList.class})
 public interface VoucherMapper {
     @Mapping(target = "validFrom", source = "validFrom", qualifiedByName = "localdate")

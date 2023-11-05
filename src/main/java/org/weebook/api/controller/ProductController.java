@@ -28,7 +28,7 @@ public class ProductController {
 
     @GetMapping("/find-all-by")
     public PageImpl<ProductDto> filterProductsBy(
-            @RequestParam(required = false) String categoryName,
+            @RequestParam(name = "category", required = false) String categoryName,
             @ModelAttribute PagingRequest pagingRequest) {
         return productService.filterProducts(categoryName, pagingRequest);
     }

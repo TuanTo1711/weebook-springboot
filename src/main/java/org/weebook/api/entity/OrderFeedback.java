@@ -49,6 +49,7 @@ public class OrderFeedback implements Serializable {
     @ElementCollection
     @Column(name = "image_url")
     @CollectionTable(name = "order_feedback_image", joinColumns = @JoinColumn(name = "order_id"))
+    @Builder.Default
     private Set<String> images = new LinkedHashSet<>();
 
     @Override

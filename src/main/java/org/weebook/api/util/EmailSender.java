@@ -6,6 +6,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class EmailSender {
 
-    private final JavaMailSender mailSender;
+    private final JavaMailSender mailSender = new JavaMailSenderImpl();
 
     @Async
     public CompletableFuture<Void> sendOTPByEmail(String recipientEmail, String otp) {

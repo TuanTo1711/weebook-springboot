@@ -57,25 +57,29 @@ public class Order implements Serializable {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @Builder.Default
     private Set<Payment> payments = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "order")
     @ToString.Exclude
+    @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
     @ToString.Exclude
-
     @OrderBy(value = "id desc")
+    @Builder.Default
     private List<OrderFeedback> orderFeedbacks = new ArrayList<>();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "order", cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @ToString.Exclude
     @OrderBy(value = "id desc")
+    @Builder.Default
     private List<OrderStatus> orderStatuses = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.MERGE)

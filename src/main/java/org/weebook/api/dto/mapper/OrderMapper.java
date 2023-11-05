@@ -1,9 +1,10 @@
 package org.weebook.api.dto.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.weebook.api.dto.*;
+import org.mapstruct.*;
+import org.weebook.api.dto.OrderDTO;
+import org.weebook.api.dto.OrderFeedBackDto;
+import org.weebook.api.dto.OrderItemDTO;
+import org.weebook.api.dto.OrderStatusDTO;
 import org.weebook.api.entity.*;
 import org.weebook.api.web.request.OrderFeedBackRequest;
 import org.weebook.api.web.request.OrderItemRequest;
@@ -13,14 +14,16 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 
-@Mapper(componentModel = "spring",
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
+        uses = {ProductMapper.class, UserMapper.class},
         imports = {UUID.class, Instant.class, List.class, ArrayList.class, LinkedHashSet.class})
 public interface OrderMapper {
     @Mapping(target = "order", source = "order")
     @Mapping(target = "product", source = "orderItemRequest.product_id", qualifiedByName = "mapIdToProduct")
     @Mapping(target = "id", ignore = true)
     OrderItem requestItemToEntity(OrderItemRequest orderItemRequest, Order order);
-
 
 
     @Mapping(target = "orderItems", expression = "java(new LinkedHashSet<>())")
@@ -33,12 +36,11 @@ public interface OrderMapper {
     OrderFeedback requestOrderFeedBackToEntity(OrderFeedBackRequest orderFeedBackRequest, Order order);
 
 
-    OrderFeedBackDto entitiOrderFeedBackToDto(OrderFeedback orderFeedback);
-
-    UserDto entityUserToDto(User user);
+    OrderFeedBackDto entityOrderFeedBackToDto(OrderFeedback orderFeedback);
 
     @Mapping(target = "orderFeedbacks", source = "order.orderFeedbacks", qualifiedByName = "orderfeedback")
     OrderDTO entityOrderToDto(Order order);
+
     List<OrderDTO> entityOrderToDtos(List<Order> order);
 
     @Mapping(target = "order", source = "order")
@@ -47,8 +49,9 @@ public interface OrderMapper {
     OrderStatus buildOrderStatus(Order order, String status);
 
     Set<OrderItemDTO> entityOrderItemToDtos(Set<OrderItem> orderItem);
+
     OrderItemDTO entityOrderItemToDto(OrderItem orderItem);
-    ProductDto entityProductToDto(Product product);
+
 
     OrderStatusDTO entityOrderStatusToDto(OrderStatus orderStatus);
 
@@ -72,11 +75,11 @@ public interface OrderMapper {
 
     @Named("orderfeedback")
     default OrderFeedBackDto orderfeedback(List<OrderFeedback> orderFeedbacks) {
-        if(orderFeedbacks.size() == 0){
+        if (orderFeedbacks.size() == 0) {
             return null;
         }
         OrderFeedback orderFeedback = orderFeedbacks.get(0);
-        return entitiOrderFeedBackToDto(orderFeedback);
+        return entityOrderFeedBackToDto(orderFeedback);
     }
 
 }
