@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 import org.weebook.api.dto.VoucherDTO;
 import org.weebook.api.service.VoucherService;
+import org.weebook.api.web.request.AddVoucherVaoUserRequest;
 import org.weebook.api.web.request.VoucherRequest;
 
 import java.util.List;
@@ -20,6 +21,11 @@ public class VoucherController {
     @PostMapping("/create")
     VoucherDTO create(@Valid @RequestBody VoucherRequest voucherRequest){
         return voucherService.create(voucherRequest);
+    }
+
+    @PostMapping("add/create")
+    VoucherDTO create(@RequestBody AddVoucherVaoUserRequest addVoucherVaoUserRequest){
+        return voucherService.create(addVoucherVaoUserRequest);
     }
 
     @GetMapping("/code")

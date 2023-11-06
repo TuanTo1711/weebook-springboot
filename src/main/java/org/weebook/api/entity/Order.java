@@ -65,7 +65,7 @@ public class Order implements Serializable {
     @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "order")
     @ToString.Exclude
     @OrderBy(value = "id desc")
     @Builder.Default
@@ -84,6 +84,7 @@ public class Order implements Serializable {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id")
+
     private User user;
 
     @Override

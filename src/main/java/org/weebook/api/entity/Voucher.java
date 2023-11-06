@@ -58,6 +58,15 @@ public class Voucher implements Serializable {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public Voucher(String code, BigDecimal condition, BigDecimal discountAmount, Instant validFrom, Instant validTo, String description) {
+        this.code = code;
+        this.condition = condition;
+        this.discountAmount = discountAmount;
+        this.validFrom = validFrom;
+        this.validTo = validTo;
+        this.description = description;
+    }
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

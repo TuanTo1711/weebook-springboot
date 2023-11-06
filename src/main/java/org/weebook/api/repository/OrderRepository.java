@@ -1,6 +1,5 @@
 package org.weebook.api.repository;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,21 +16,20 @@ public interface OrderRepository extends JpaRepository<Order,Long>, JpaSpecifica
         select o from Order o
         where o.user.id = :user and o.status = :status
     """)
-    Page<Order> userFindByStatus(Long user, String status, Pageable pageable);
+    List<Order> userFindByStatus(Long user, String status, Pageable pageable);
 
     @Query("""
         select o from Order o
         where o.status = :status
     """)
-    Page<Order> adminFindByStatus(String status, Pageable pageable);
+    List<Order> adminFindByStatus(String status, Pageable pageable);
 
 
     @Query("""
-                select new TKProductDto(p.id, p.name, p.images, sum(oi.quantity), cast(sum(oi.quantity * oi.unitPrice) as bigdecimal))
-                from Order o join o.orderItems oi join oi.product p
-                where o.status = 'success' and date(o.orderDate) >= :dateMin and date(o.orderDate) <= :dateMax
-                and  p.name like :nameProduct
-                group by p.id, p.name, p.images
-            """)
+        select new TKProductDto(p.id, p.name, p.images, sum(oi.quantity), cast(sum(oi.quantity * oi.unitPrice) as java.math.BigDecimal)) from Order o join o.orderItems oi join oi.product p
+        where o.status = 'success' and date(o.orderDate) >= :dateMin and date(o.orderDate) <= :dateMax
+        and  p.name like :nameProduct
+        group by p.id, p.name, p.images
+    """)
     List<TKProductDto> byOrder(LocalDate dateMin, LocalDate dateMax, String nameProduct);
 }
