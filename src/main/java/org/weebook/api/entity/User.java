@@ -64,9 +64,11 @@ public class User implements UserDetails {
     private BigDecimal balance;
 
     @CreatedDate
+    @Column(name = "created_At")
     private Instant created_At;
 
     @LastModifiedDate
+    @Column(name = "update_At")
     private Instant update_At;
 
     @Column(name = "deleted_date")

@@ -15,4 +15,6 @@ public interface UserRepo extends JpaSpecificationExecutor<User>, JpaRepository<
     User findByEmail(String emailUser);
 
     User findUserByUsername(String username);
+
+    void deleteByUsername(String username);
 }

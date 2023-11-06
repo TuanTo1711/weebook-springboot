@@ -12,18 +12,18 @@ import org.weebook.api.web.response.ResultResponse;
 public class OtpAuthController {
     private final OTPServiceImpl otpService;
 
-    @GetMapping("/verify-otp")
+    @PostMapping("/verify-otp")
     public ResultResponse verifyOTP(@RequestParam String email, @RequestParam String otp) {
         return otpService.verifyOtp(email, otp);
     }
 
-    @PostMapping("/refresh-otp-expired")
+    @GetMapping("/refresh-otp-expired")
     public ResultResponse refreshOtp(@RequestParam String email){
         otpService.refreshOtpExpired(email);
         return ResultResponse.builder()
                 .status(HttpStatus.OK.value())
                 .message("Refresh otp successfully please check email ^^")
-                .data("Otp send mail you enter: "+email)
+                .data("Otp send mail you enter: " +email)
                 .build();
     }
 }
