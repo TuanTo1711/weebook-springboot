@@ -3,6 +3,7 @@ package org.weebook.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -31,6 +32,7 @@ public class Transaction implements Serializable {
     @Column(name = "action", length = Integer.MAX_VALUE)
     private String action;
 
+    @CreatedDate
     @Column(name = "action_time")
     private Instant actionTime;
 

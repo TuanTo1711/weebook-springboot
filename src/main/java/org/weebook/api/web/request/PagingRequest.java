@@ -41,7 +41,7 @@ public class PagingRequest implements Serializable {
     @Builder.Default
     private String sortBy = "createdDate";
     @Builder.Default
-    private String sortType = "asc";
+    private String sortType = "desc";
     @Builder.Default
     private transient List<FilterRequest> filters = new LinkedList<>();
 }

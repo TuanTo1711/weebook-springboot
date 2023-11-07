@@ -1,5 +1,7 @@
 package org.weebook.api.util;
 
+import com.github.slugify.Slugify;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import org.springframework.data.domain.Range;
@@ -8,9 +10,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
+import org.weebook.api.exception.StringException;
 import org.weebook.api.web.request.FilterRequest;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +32,8 @@ import static org.springframework.data.domain.Sort.Direction.fromString;
  * @author Tô Hoàng Tuấn - Yuuta
  */
 public class CriteriaUtility {
+
+    private static final Slugify slugify = Slugify.builder().build();
 
     private CriteriaUtility() {
     }
@@ -54,8 +63,7 @@ public class CriteriaUtility {
                 return null;
             }
             Path<String> path = getPath(field, root);
-            return criteriaBuilder
-                    .like(criteriaBuilder.lower(path), value.toLowerCase());
+            return criteriaBuilder.like(criteriaBuilder.lower(path), value.toLowerCase());
         };
     }
 
@@ -89,48 +97,6 @@ public class CriteriaUtility {
         };
     }
 
-    public static <T> Specification<T> buildFieldSearch(String field, String value) {
-        return (root, query, criteriaBuilder) -> {
-            if (!StringUtils.hasText(field)) {
-                return null;
-            }
-
-            StringBuilder values = new StringBuilder();
-
-            if (!StringUtils.containsWhitespace(value.trim()) || value.length() <= 1) {
-                values.append(value);
-            } else {
-                values.append(StringUtils.replace(value, " ", "%"));
-            }
-
-            Path<String> path = getPath(field, root);
-            return criteriaBuilder.like(criteriaBuilder.lower(path),
-                    "%" + values.toString().toLowerCase() + "%");
-        };
-    }
-
-    public static <T> Specification<T> buildFieldLikeLeading(String field, String value) {
-        return (root, query, criteriaBuilder) -> {
-            if (!StringUtils.hasText(field)) {
-                return null;
-            }
-
-            Path<String> path = getPath(field, root);
-            return criteriaBuilder.like(criteriaBuilder.lower(path), value.toLowerCase() + "%");
-        };
-    }
-
-    public static <T> Specification<T> buildFieldGE(String field, Integer value) {
-        return (root, query, criteriaBuilder) -> {
-            if (!StringUtils.hasText(field)) {
-                return null;
-            }
-
-            Path<Integer> path = getPath(field, root);
-            return criteriaBuilder.greaterThanOrEqualTo(path, value);
-        };
-    }
-
     /**
      * Builds a Specification to filter records based on a field having an exact value.
      *
@@ -159,16 +125,35 @@ public class CriteriaUtility {
         };
     }
 
-    public static <T> Specification<T> buildFieldRange(String field, Range<BigDecimal> range) {
+    public static <T> Specification<T> buildFieldEqualsInstant(String field, Object value) {
         return (root, query, criteriaBuilder) -> {
             if (!StringUtils.hasText(field)) {
                 return null;
             }
+            Path<?> path = getPath(field, root);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            try {
+                Instant instant = Instant.from(formatter.parse((String) value));
+                return criteriaBuilder.equal(path, instant);
+            } catch (DateTimeParseException e) {
+                throw new StringException("Bạn nhập chuỗi sai");
+            }
+        };
+    }
 
-            Path<BigDecimal> path = getPath(field, root);
-            return criteriaBuilder.between(path,
-                    range.getLowerBound().getValue().get(),
-                    range.getUpperBound().getValue().get());
+    public static <T> Specification<T> buildFieldEqualsLocalDate(String field, Object value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+            Path<?> path = getPath(field, root);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            try {
+                LocalDate localDate = LocalDate.parse((String) value, formatter);
+                return criteriaBuilder.equal(path, localDate);
+            } catch (DateTimeParseException e) {
+                throw new StringException("Bạn nhập chuỗi sai");
+            }
         };
     }
 
@@ -262,6 +247,61 @@ public class CriteriaUtility {
         return Sort.by(field);
     }
 
+    public static <T> Specification<T> buildFieldSearch(String field, String value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+
+            StringBuilder values = new StringBuilder();
+
+            if (!StringUtils.containsWhitespace(value.trim()) || value.length() <= 1) {
+                values.append(value);
+            } else {
+                values.append(StringUtils.replace(value, " ", "%"));
+            }
+
+            Path<String> path = getPath(field, root);
+            return criteriaBuilder.like(criteriaBuilder.lower(path),
+                    "%" + values.toString().toLowerCase() + "%");
+        };
+    }
+
+    public static <T> Specification<T> buildFieldLikeLeading(String field, String value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+
+            Path<String> path = getPath(field, root);
+            return criteriaBuilder.like(criteriaBuilder.lower(path), value.toLowerCase() + "%");
+        };
+    }
+
+    public static <T> Specification<T> buildFieldGE(String field, Integer value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+
+            Path<Integer> path = getPath(field, root);
+            return criteriaBuilder.greaterThanOrEqualTo(path, value);
+        };
+    }
+
+    public static <T> Specification<T> buildFieldRange(String field, Range<BigDecimal> range) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field)) {
+                return null;
+            }
+
+            Path<BigDecimal> path = getPath(field, root);
+            return criteriaBuilder.between(path,
+                    range.getLowerBound().getValue().get(),
+                    range.getUpperBound().getValue().get());
+        };
+    }
+
     public static <T> Specification<T> toSpecification(FilterRequest filterRequest) {
         String type = filterRequest.getType();
 
@@ -284,14 +324,31 @@ public class CriteriaUtility {
             case EQ -> {
                 return buildFieldEquals(filterRequest.getField(), filterRequest.getValue());
             }
+            case EQLCD -> {
+                return buildFieldEqualsLocalDate(filterRequest.getField(), filterRequest.getValue());
+            }
             case BETWEEN -> {
                 return buildFieldRange(filterRequest.getField(), getRange(filterRequest.getValue()));
             }
             case GE -> {
                 return buildFieldGE(filterRequest.getField(), NumberUtils.parseNumber(filterRequest.getValue(), Integer.class));
             }
+            case SLUG -> {
+                return buildFieldSlug(filterRequest.getField(), filterRequest.getValue());
+            }
             default -> throw new IllegalArgumentException("Criteria Type: '%s' is not supported".formatted(type));
         }
+    }
+
+    public static <T> Specification<T> buildFieldSlug(String field, String value) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(field) || !StringUtils.hasText(value)) {
+                return null;
+            }
+
+            Path<String> path = getPath(field, root);
+            return criteriaBuilder.like(toSlug(criteriaBuilder, path), slugify.slugify(value));
+        };
     }
 
     private static <T> Specification<T> buildFieldUUID(String field, String value) {
@@ -345,14 +402,23 @@ public class CriteriaUtility {
         return getRange(value, "_|-");
     }
 
+    private static Expression<String> toSlug(CriteriaBuilder criteriaBuilder, Expression<String> path) {
+        return criteriaBuilder.function(
+                "public.slugify",
+                String.class,
+                path
+        );
+    }
+
     public enum CriteriaType {
         EQ, // Equal
+        EQLCD, // Equal localdate
         LT, // Less Than
         GT, // Greater Than
         LE, // Less Than or Equal
         GE, // Greater Than or Equal
         LIKE, // Like (for text search)
         LIKE_ANY,
-        UID, BETWEEN
+        UID, SLUG, BETWEEN
     }
 }

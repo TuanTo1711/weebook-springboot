@@ -9,20 +9,17 @@ import java.util.List;
 public interface ProductService {
     ProductDto saveProduct(ProductDto productDto);
 
-    PageImpl<ProductDto> findAll(PagingRequest pagingRequest);
+    PageImpl<ProductDto> getAll(PagingRequest pagingRequest);
 
-    ProductDto update(ProductDto productDto, Long id) ;
+    ProductDto update(ProductDto productDto, Long id);
 
     List<ProductDto> saveListProduct(List<ProductDto> booksDTO);
 
-    PageImpl<ProductDto> filterProducts(Long id, PagingRequest pagingRequest);
+    PageImpl<ProductDto> filterProducts(String categoryName, PagingRequest pagingRequest);
 
-    PageImpl<ProductDto> findByName(PagingRequest pagingRequest,String name);
+    List<ProductDto> findByName(String name);
 
     List<ProductDto> findByNameSuggest(String name);
 
-
-
-
-    void delete(Long id) ;
+    void delete(Long id);
 }

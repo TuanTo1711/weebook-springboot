@@ -1,0 +1,27 @@
+server:
+  error:
+    include-binding-errors: always
+    include-message: always
+  port: 8080
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  flyway:
+    baseline-on-migrate: true
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        show-sql: true
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.security: DEBUG
+    org.hibernate: ERROR
+    dev.weebook.api: INFO
+    sql: trace
+app:
+  keys:
+    public-key: classpath:key/public-key.pem
+    private-key: classpath:key/private-key.pem

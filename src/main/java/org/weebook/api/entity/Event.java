@@ -10,9 +10,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Builder
 @AllArgsConstructor
@@ -58,7 +58,7 @@ public class Event implements Serializable {
     @OneToMany(mappedBy = "event")
     @ToString.Exclude
     @Builder.Default
-    private Set<Product> products = new LinkedHashSet<>();
+    private List<Product> products = new ArrayList<>();
 
     @Override
     public final boolean equals(Object o) {

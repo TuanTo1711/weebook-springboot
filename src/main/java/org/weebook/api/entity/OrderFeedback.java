@@ -9,7 +9,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Builder
 @AllArgsConstructor
@@ -43,6 +45,12 @@ public class OrderFeedback implements Serializable {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @ElementCollection
+    @Column(name = "image_url")
+    @CollectionTable(name = "order_feedback_image", joinColumns = @JoinColumn(name = "order_id"))
+    @Builder.Default
+    private Set<String> images = new LinkedHashSet<>();
 
     @Override
     public final boolean equals(Object o) {

@@ -5,5 +5,7 @@ import org.weebook.api.dto.CategoryDto;
 import java.util.List;
 
 public interface CategoryService {
-    List<CategoryDto> findAll();
+    List<CategoryDto> loadAllHierarchyCategory();
+
+    List<CategoryDto> loadCategoryByName(String name);
 }

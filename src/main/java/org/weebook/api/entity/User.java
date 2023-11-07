@@ -2,12 +2,16 @@ package org.weebook.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.StringUtils;
+
 import java.io.Serial;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -33,10 +37,10 @@ public class User implements UserDetails {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "username", length = Integer.MAX_VALUE)
+    @Column(name = "username", length = Integer.MAX_VALUE, unique = true)
     private String username;
 
-    @Column(name = "email", length = Integer.MAX_VALUE)
+    @Column(name = "email", length = Integer.MAX_VALUE, unique = true)
     private String email;
 
     @Column(name = "password", length = Integer.MAX_VALUE)
@@ -63,83 +67,68 @@ public class User implements UserDetails {
     @Column(name = "balance")
     private BigDecimal balance;
 
-    @CreatedDate
-    @Column(name = "created_At")
-    private Instant created_At;
-
-    @LastModifiedDate
-    @Column(name = "update_At")
-    private Instant update_At;
-
-    @Column(name = "deleted_date")
-    private Instant deletedDate;
-
     @Column(name = "otp_code", length = 4)
     private String otpCode;
 
     @Column(name = "otp_expiry_time")
     private LocalDateTime otpExpiryTime;
 
+    @CreatedDate
+    @Column(name = "created_At")
+    private Instant createdAt;
+
+    @LastModifiedDate
+    @Column(name = "update_At")
+    private Instant updateAt;
+
+    @Column(name = "deleted_date")
+    private Instant deletedDate;
+
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Role role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
-    private Set<Transaction> transactions = new LinkedHashSet<>();
+    @OrderBy(value = "id desc")
+    private List<Transaction> transactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
+    @ToString.Exclude
+    @Builder.Default
+    private List<Notification> notifications = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
-    private Set<Notification> notifications = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "user")
-    @ToString.Exclude
-    @Builder.Default
-    private Set<Address> addresses = new LinkedHashSet<>();
+    private List<Address> addresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
+    @ToString.Exclude
+    @Builder.Default
+    private List<Voucher> vouchers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
+    @ToString.Exclude
+    @Builder.Default
+    private Set<Order> orders = new LinkedHashSet<>();
+
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     @Builder.Default
-    private Set<Voucher> vouchers = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "user")
-    @ToString.Exclude
-    @Builder.Default
-    private Set<Favorite> favorites = new LinkedHashSet<>();
-
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || this.getClass() != o.getClass()) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy hibernateProxy
-                ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
-                : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy hibernateProxy
-                ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
-                : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        User entity = (User) o;
-        return getId() != null && Objects.equals(getId(), entity.getId());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hibernateProxy
-                ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : getClass().hashCode();
-    }
+    @OrderBy("createdAt DESC")
+    private List<Favorite> favorites = new LinkedList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorityList = AuthorityUtils.createAuthorityList(role.getPermissions());
-        return authorityList;
+        return AuthorityUtils.createAuthorityList(role.getPermissions());
     }
 
     @Override
@@ -169,9 +158,28 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        if (otpExpiryTime != null && otpExpiryTime.isBefore(LocalDateTime.now())) {
-            return false;
-        }
-        return otpCode == null || !otpCode.isEmpty();
+        return StringUtils.hasText(otpCode);
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy hibernateProxy
+                ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy hibernateProxy
+                ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        User entity = (User) o;
+        return getId() != null && Objects.equals(getId(), entity.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hibernateProxy
+                ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : getClass().hashCode();
     }
 }

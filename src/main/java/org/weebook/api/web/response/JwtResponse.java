@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.weebook.api.dto.RoleDto;
 import org.weebook.api.dto.UserDto;
 
 @Data
@@ -13,11 +12,7 @@ import org.weebook.api.dto.UserDto;
 @AllArgsConstructor
 public class JwtResponse {
 
-    private UserDto userDto;
+    private UserDto userInfo;
 
     private String accessToken;
-
-    @Builder.Default
-    private String type = "Bearer ";
-
 }

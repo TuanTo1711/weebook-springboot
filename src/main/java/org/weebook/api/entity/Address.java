@@ -56,8 +56,9 @@ public class Address implements Serializable {
     @Column(name = "is_default_billing")
     private Boolean isDefaultBilling;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private User user;
 
     @Override

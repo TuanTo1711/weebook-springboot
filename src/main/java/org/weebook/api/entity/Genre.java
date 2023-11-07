@@ -34,7 +34,11 @@ public class Genre implements Serializable {
     @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
 
-    @ManyToMany(mappedBy = "genres")
+    @ManyToMany
+    @JoinTable(name = "product_genres",
+            joinColumns = @JoinColumn(name = "genres_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+//    @ManyToMany(mappedBy = "genres")
     @ToString.Exclude
     @Builder.Default
     private Set<Product> products = new LinkedHashSet<>();

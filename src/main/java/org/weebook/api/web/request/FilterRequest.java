@@ -1,12 +1,11 @@
 package org.weebook.api.web.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class FilterRequest {
     private String field;
     private String value;
