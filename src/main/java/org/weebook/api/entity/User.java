@@ -74,11 +74,11 @@ public class User implements UserDetails {
     private LocalDateTime otpExpiryTime;
 
     @CreatedDate
-    @Column(name = "created_At")
+    @Column(name = "created_at")
     private Instant createdAt;
 
     @LastModifiedDate
-    @Column(name = "update_At")
+    @Column(name = "update_at")
     private Instant updateAt;
 
     @Column(name = "deleted_date")
