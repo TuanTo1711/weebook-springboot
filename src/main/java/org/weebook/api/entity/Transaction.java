@@ -51,6 +51,7 @@ public class Transaction implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+//    @Builder.Default
     private User user;
 
     @Override

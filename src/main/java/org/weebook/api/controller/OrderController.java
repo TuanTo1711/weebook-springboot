@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import org.weebook.api.dto.OrderDTO;
 import org.weebook.api.dto.OrderFeedBackDto;
 import org.weebook.api.dto.TKProductDto;
+import org.weebook.api.dto.TkDto;
 import org.weebook.api.service.OrderService;
 import org.weebook.api.web.request.OrderFeedBackRequest;
 import org.weebook.api.web.request.OrderRequest;
+import org.weebook.api.web.request.TkOrderRequest;
 import org.weebook.api.web.request.UpdateStatusOrderRequest;
 
 import java.util.List;
@@ -45,8 +47,13 @@ public class OrderController {
         return orderService.adminFindByStatus(status, page);
     }
 
-    @GetMapping("/tk/by/order")
-    public List<TKProductDto> tkByOrder(){
-        return orderService.tkByOrder();
+    @PostMapping("/tk/by/order")
+    public TkDto tkByOrder(@RequestBody TkOrderRequest tkOrderRequest){
+        return orderService.tkByOrder(tkOrderRequest);
+    }
+
+    @GetMapping("getYearMonth")
+    public List<String> getYearMonth(){
+        return orderService.getYearMonth();
     }
 }

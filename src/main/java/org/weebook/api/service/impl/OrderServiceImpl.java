@@ -7,16 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.weebook.api.dto.OrderDTO;
 import org.weebook.api.dto.OrderFeedBackDto;
 import org.weebook.api.dto.TKProductDto;
+import org.weebook.api.dto.TkDto;
 import org.weebook.api.dto.mapper.NotificationMapper;
 import org.weebook.api.dto.mapper.OrderMapper;
 import org.weebook.api.entity.*;
 import org.weebook.api.exception.StringException;
 import org.weebook.api.repository.*;
 import org.weebook.api.service.OrderService;
-import org.weebook.api.web.request.OrderFeedBackRequest;
-import org.weebook.api.web.request.OrderItemRequest;
-import org.weebook.api.web.request.OrderRequest;
-import org.weebook.api.web.request.UpdateStatusOrderRequest;
+import org.weebook.api.web.request.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -47,7 +45,11 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus("order");
 
         //user
-        User user = userRepository.findById(orderRequest.getUser_id()).orElse(null);
+        Optional<User> optionalUser = userRepository.findById(orderRequest.getUser_id());
+        if(optionalUser.isEmpty()){
+            throw new StringException("Không có tài khoản này");
+        }
+        User user = optionalUser.get();
         order.setUser(user);
 
         //check voucher dc phép sử dụng
@@ -154,8 +156,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<TKProductDto> tkByOrder() {
-        return null;
+    public TkDto tkByOrder(TkOrderRequest tkOrderRequest) {
+        String[] monthYear = tkOrderRequest.getYearMonth().split("-");
+        List<TKProductDto> tkProductDto = orderItemRepository.thongke(
+                Integer.valueOf(monthYear[1]),Integer.valueOf(monthYear[0]),
+                "%"+tkOrderRequest.getNameProduct()+"%",
+                PageRequest.of(tkOrderRequest.getPage()-1,8));
+
+        BigDecimal total = orderItemRepository.thongketotal(Integer.valueOf(monthYear[1]),Integer.valueOf(monthYear[0]),
+                "%"+tkOrderRequest.getNameProduct()+"%");
+        return TkDto
+                .builder()
+                .total(total)
+                .productDto(tkProductDto)
+                .build();
+    }
+
+    @Override
+    public List<String> getYearMonth() {
+        return orderRepository.findAllMonthYear();
     }
 
     Transaction transaction(Order order){
