@@ -33,13 +33,13 @@ import static org.springframework.data.domain.Sort.Direction.fromString;
  *
  * @author Tô Hoàng Tuấn - Yuuta
  */
-public class CriteriaUtility {
+public class CriteriaUtil {
 
     private static final Slugify slugify = Slugify.builder()
 //            .customReplacement("[^a-z0-9\\-_.\\s]+", "-")
             .build();
 
-    private CriteriaUtility() {
+    private CriteriaUtil() {
     }
 
     /**
@@ -387,7 +387,7 @@ public class CriteriaUtility {
         }
 
         return filterRequests.stream()
-                .<Specification<T>>map(CriteriaUtility::toSpecification)
+                .<Specification<T>>map(CriteriaUtil::toSpecification)
                 .reduce(Specification.where(null), Specification::and);
     }
 

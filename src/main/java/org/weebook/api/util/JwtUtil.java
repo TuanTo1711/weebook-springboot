@@ -15,13 +15,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
 @Component
-public class JwtUtils {
+public class JwtUtil {
     private static final String AUTHORITIES_CLAIM_NAME = "authorities";
     private static final int JWT_TOKEN_VALIDITY = 30;
     private final JwsAlgorithm algorithm;
     private final JwtEncoder encoder;
 
-    public JwtUtils(JwtEncoder encoder) {
+    public JwtUtil(JwtEncoder encoder) {
         this.algorithm = SignatureAlgorithm.RS256;
         this.encoder = encoder;
     }

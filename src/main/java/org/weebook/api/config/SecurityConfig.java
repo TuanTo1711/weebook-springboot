@@ -1,4 +1,4 @@
-package org.weebook.api.security;
+package org.weebook.api.config;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -24,7 +24,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.weebook.api.config.KeyConfig;
 
 @Configuration
 @RequiredArgsConstructor
@@ -51,11 +50,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "api/v1/auth/**").hasAuthority("read")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/otp/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/category/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/user/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/otp/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/otp/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sessionManager -> sessionManager
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

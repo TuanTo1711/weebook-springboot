@@ -17,7 +17,6 @@ import java.io.Serial;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Builder
@@ -73,14 +72,14 @@ public class User implements UserDetails {
     private String otpCode;
 
     @Column(name = "otp_expiry_time")
-    private LocalDateTime otpExpiryTime;
+    private Instant otpExpiryTime;
 
     @CreatedDate
     @Column(name = "created_at")
     private Instant createdAt;
 
     @LastModifiedDate
-    @Column(name = "update_at")
+    @Column(name = "updated_at")
     private Instant updateAt;
 
     @Column(name = "deleted_date")

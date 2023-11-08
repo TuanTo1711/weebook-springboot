@@ -8,7 +8,7 @@ import org.weebook.api.dto.mapper.CategoryMapper;
 import org.weebook.api.entity.Category;
 import org.weebook.api.repository.CategoryRepository;
 import org.weebook.api.service.CategoryService;
-import org.weebook.api.util.CriteriaUtility;
+import org.weebook.api.util.CriteriaUtil;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> loadCategoryByName(String name) {
-        Specification<Category> specification = CriteriaUtility.buildFieldSlug("name", name);
+        Specification<Category> specification = CriteriaUtil.buildFieldSlug("name", name);
         List<Category> categories = categoryRepository.findAll(specification);
         return categoryMapper.listToDto(categories);
     }

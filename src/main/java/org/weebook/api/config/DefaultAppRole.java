@@ -9,7 +9,7 @@ public class DefaultAppRole {
     private DefaultAppRole() {
     }
 
-    public static final RoleDto DEFAULT_ROLE_CONFIG = new RoleDto(
+    public static final RoleDto DEFAULT_USER_ROLE = new RoleDto(
             "user",
             Set.of("read_book",
                     "purchase_book",

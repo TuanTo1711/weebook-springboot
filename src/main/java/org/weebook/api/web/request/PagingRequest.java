@@ -28,14 +28,14 @@ public class PagingRequest implements Serializable {
     @NotNull(message = "Page number must be not null !!!")
     @NotEmpty(message = "Page number must be not empty !!!")
     @NotBlank(message = "Page number must be not blank !!!")
-    @Min(value = 0, message = "Page number must be greater than or equal to {value}")
+    @Min(value = 1, message = "Page number must be greater than or equal to {value}")
     @Builder.Default
-    private Integer pageNumber = 0;
+    private Integer pageNumber = 1;
 
     @NotNull(message = "Page size must be not null !!!")
     @NotEmpty(message = "Page size must be not empty !!!")
     @NotBlank(message = "Page size must be not blank !!!")
-    @Min(value = 0, message = "Page size must be greater than or equal to {value}")
+    @Min(value = 1, message = "Page size must be greater than or equal to {value}")
     @Builder.Default
     private Integer pageSize = 48;
     @Builder.Default

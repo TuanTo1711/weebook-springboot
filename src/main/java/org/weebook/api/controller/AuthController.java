@@ -10,6 +10,7 @@ import org.weebook.api.service.AuthService;
 import org.weebook.api.web.request.ChangePasswordRequest;
 import org.weebook.api.web.request.SignInRequest;
 import org.weebook.api.web.request.SignUpRequest;
+import org.weebook.api.web.request.VerifyEmail;
 import org.weebook.api.web.response.JwtResponse;
 import org.weebook.api.web.response.ResultResponse;
 import org.weebook.api.web.response.UpdateProfileResponse;
@@ -47,7 +48,7 @@ public class AuthController {
         return ResultResponse.<UpdateProfileResponse>builder()
                 .status(HttpStatus.OK.value())
                 .message("Update profile successfully !")
-                .data(authService.updateProfile(userDto))
+                .data(authService.update(userDto))
                 .build();
     }
 
@@ -58,6 +59,15 @@ public class AuthController {
                 .status(HttpStatus.OK.value())
                 .message("Update password successfully please login again !")
                 .data(null)
+                .build();
+    }
+
+    @PostMapping("/verify-otp")
+    public ResultResponse<Boolean> verifyOTP(@RequestBody VerifyEmail body) {
+        return ResultResponse.<Boolean>builder()
+                .status(200)
+                .message("OTP Verify")
+                .data(authService.verifyOtp(body.email(), body.code()))
                 .build();
     }
 }

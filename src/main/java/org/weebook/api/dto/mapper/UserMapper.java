@@ -31,7 +31,7 @@ public interface UserMapper {
 
     @InheritInverseConfiguration
     @Mapping(target = "id", ignore = true)
-    User partialUpdate(UserDto userDto, @MappingTarget User user);
+    void partialUpdate(UserDto userDto, @MappingTarget User user);
 
     @Mapping(target = "userOld" , source = "userDto")
     @Mapping(target = "userNew", source = "dto")

@@ -1,4 +1,4 @@
-package org.weebook.api.exception;
+package org.weebook.api.exception.error;
 
 
 

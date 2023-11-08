@@ -14,14 +14,10 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.weebook.api.dto.UserDto;
-import org.weebook.api.dto.mapper.UserMapper;
 import org.weebook.api.entity.User;
 import org.weebook.api.repository.UserRepository;
 
-import java.util.Optional;
-
-import static org.weebook.api.exception.ErrorMessages.ACCOUNT_NOT_FOUND_ERROR;
+import static org.weebook.api.exception.error.ErrorMessages.ACCOUNT_NOT_FOUND_ERROR;
 
 @Service("userDetailsService")
 @RequiredArgsConstructor
@@ -34,9 +30,9 @@ public class UserServiceImpl implements UserDetailsManager {
     private SecurityContextHolderStrategy securityContextHolderStrategy
             = SecurityContextHolder.getContextHolderStrategy();
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Assert.notNull(username, "Username must be not null");
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ACCOUNT_NOT_FOUND_ERROR));
     }
@@ -44,7 +40,7 @@ public class UserServiceImpl implements UserDetailsManager {
     @Override
     public void createUser(UserDetails userDetails) {
         String username = userDetails.getUsername();
-        Assert.isTrue(!this.userExists(username), "User with username: %s exists".formatted(username));
+        Assert.isTrue(!this.userExists(username), "User with username: %s exists" .formatted(username));
         User user = (User) userDetails;
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
@@ -69,10 +65,9 @@ public class UserServiceImpl implements UserDetailsManager {
             throw new AccessDeniedException("Can't change password as no Authentication object found in context for current user.");
         } else {
             String username = currentUser.getName();
-
             User user = (User) loadUserByUsername(username);
             Assert.state(user != null, "Current user doesn't exist in database.");
-
+            Assert.state(passwordEncoder.matches(oldPassword, user.getPassword()), "Old password don't match.");
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.saveAndFlush(user);
         }

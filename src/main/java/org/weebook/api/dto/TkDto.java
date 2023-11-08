@@ -1,6 +1,5 @@
 package org.weebook.api.dto;
 
-import jakarta.persistence.Entity;
 import lombok.*;
 
 import java.math.BigDecimal;

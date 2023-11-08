@@ -10,15 +10,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.weebook.api.exception.ErrorMessages;
-import org.weebook.api.exception.ErrorResponses;
+import org.weebook.api.exception.error.ErrorMessages;
+import org.weebook.api.exception.error.ErrorResponses;
+import org.weebook.api.exception.error.Error;
 import org.weebook.api.exception.StringException;
-import org.weebook.api.exception.ValidationError;
-import org.weebook.api.exception.error.InsufficientFundsException;
+import org.weebook.api.exception.error.ValidationError;
+import org.weebook.api.exception.InsufficientFundsException;
 import org.weebook.api.web.response.ErrorResponse;
 import org.weebook.api.web.response.JwtResponse;
 import org.weebook.api.web.response.ResultResponse;
-import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponses> handleException(StringException ex) {
         var errorResponse = ErrorResponses.builder()
                 .uuid(UUID.randomUUID())
-                .errors(Collections.singletonList(new org.weebook.api.exception.Error(HttpStatus.BAD_REQUEST, ex.getMessage())))
+                .errors(Collections.singletonList(new Error(HttpStatus.BAD_REQUEST, ex.getMessage())))
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);

@@ -8,8 +8,6 @@ import java.time.Instant;
 @Getter
 @Setter
 public class OrderStatusDTO {
-    String status;
+    private String status;
     private Instant statusDate;
-
-
 }

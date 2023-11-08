@@ -23,7 +23,7 @@ import org.weebook.api.web.request.PagingRequest;
 import java.util.List;
 import java.util.Optional;
 
-import static org.weebook.api.util.CriteriaUtility.*;
+import static org.weebook.api.util.CriteriaUtil.*;
 
 @Service
 @AllArgsConstructor
@@ -95,7 +95,7 @@ public class ProductServiceImpl implements ProductService {
 
     private Pageable buildPageable(PagingRequest pagingRequest) {
         return PageRequest.of(
-                pagingRequest.getPageNumber(),
+                pagingRequest.getPageNumber() <= 0 ? 0 : pagingRequest.getPageNumber(),
                 pagingRequest.getPageSize(),
                 buildSort(pagingRequest.getSortBy(), pagingRequest.getSortType())
         );

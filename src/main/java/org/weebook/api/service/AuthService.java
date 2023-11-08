@@ -13,10 +13,9 @@ public interface AuthService {
 
     UserDto register(SignUpRequest signUpRequest);
 
-    UpdateProfileResponse updateProfile(UserDto userDto);
+    UpdateProfileResponse update(UserDto userDto);
 
     void changePassword(ChangePasswordRequest changePasswordRequest);
 
-    JwtResponse removeAuth(SignInRequest signInRequest);
-
+    Boolean verifyOtp(String email, String code);
 }

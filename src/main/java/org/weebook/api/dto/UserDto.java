@@ -1,6 +1,7 @@
 package org.weebook.api.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -13,5 +14,7 @@ public record UserDto(
         String lastName,
         Boolean gender,
         LocalDate birthday,
-        String avatarUrl) implements Serializable {
+        String avatarUrl,
+        BigDecimal balance,
+        String tier) implements Serializable {
 }

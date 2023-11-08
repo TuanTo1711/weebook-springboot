@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 @Setter
 public class OrderItemRequest {
     private Integer quantity;
-
     private BigDecimal unitPrice;
     private ProductInfo product;
 }

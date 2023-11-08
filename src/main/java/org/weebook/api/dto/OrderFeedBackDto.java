@@ -9,9 +9,6 @@ import java.util.Set;
 @Setter
 public class OrderFeedBackDto {
     private Integer rating;
-
     private String reviewText;
-
-
     private Set<String> images = null;
 }

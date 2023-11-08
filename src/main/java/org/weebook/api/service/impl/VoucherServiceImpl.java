@@ -17,7 +17,7 @@ import org.weebook.api.repository.NotificationRepository;
 import org.weebook.api.repository.UserRepository;
 import org.weebook.api.repository.VoucherRepository;
 import org.weebook.api.service.VoucherService;
-import org.weebook.api.util.CriteriaUtility;
+import org.weebook.api.util.CriteriaUtil;
 import org.weebook.api.web.request.AddVoucherVaoUserRequest;
 import org.weebook.api.web.request.FilterRequest;
 import org.weebook.api.web.request.VoucherRequest;
@@ -32,19 +32,20 @@ public class VoucherServiceImpl implements VoucherService {
     final VoucherMapper voucherMapper;
     final NotificationMapper notificationMapper;
     final NotificationRepository notificationRepository;
-//    final OrderRepo orderRepo;
+    //    final OrderRepo orderRepo;
     final String MESSAGE_DELETE = "Voucher đã bị xóa : ";
     final String TITLE = "Voucher";
     final String TYPE = "voucher";
+
     @Override
     public VoucherDTO create(VoucherRequest voucherRequest) {
         Specification<User> specification = getSpecificationOr(voucherRequest.getFilterRequest());
         List<User> users = userRepository.findAll(specification);
         Voucher voucher = voucherMapper.requestToEntity(voucherRequest);
-        if(voucherRequest.getFilterRequest() == null){
+        if (voucherRequest.getFilterRequest() == null) {
             userAddNotifications(users, TITLE, "Bạn có 1 voucher mới :" + voucher.getCode(), TYPE);
             voucherRepository.save(voucher);
-        }else {
+        } else {
             userAddNotificationsAndVoucher(users, voucher, TITLE, "Bạn có 1 voucher mới :" + voucher.getCode(), TYPE);
         }
         return voucherMapper.entityToDto(voucher);
@@ -56,15 +57,15 @@ public class VoucherServiceImpl implements VoucherService {
         List<Voucher> vouchers = voucherRepository
                 .findByCodeEquals(addVoucherVaoUserRequest
                         .getVoucherDTO().getCode());
-        if(vouchers.size() == 0){
+        if (vouchers.isEmpty()) {
             return null;
         }
 
         Voucher checkVoucher = vouchers.get(0);
-        if(checkVoucher.getUser() == null){
+        if (checkVoucher.getUser() == null) {
             List<User> users = userRepository.findAll();
-            String message = "Xin loi vì voucher : "+addVoucherVaoUserRequest.getVoucherDTO().getCode() + " chỉ dành cho những khách đặc biệt";
-            userAddNotifications(users, "Voucher",message, "voucher");
+            String message = "Xin loi vì voucher : " + addVoucherVaoUserRequest.getVoucherDTO().getCode() + " chỉ dành cho những khách đặc biệt";
+            userAddNotifications(users, "Voucher", message, "voucher");
             voucherRepository.deleteVoucherByCodeEquals(addVoucherVaoUserRequest
                     .getVoucherDTO().getCode());
         }
@@ -72,7 +73,7 @@ public class VoucherServiceImpl implements VoucherService {
         Specification<User> specification = getSpecificationOr(addVoucherVaoUserRequest.getFilterRequest());
         List<User> users = userRepository.findAll(specification);
 
-        if(addVoucherVaoUserRequest.getFilterRequest() == null){
+        if (addVoucherVaoUserRequest.getFilterRequest() == null) {
             throw new StringException("Lần trước nhậu quên nhập giờ thì nhớ nha.");
         }
 
@@ -85,15 +86,14 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public List<VoucherDTO> userGetAll(Long id) {
-        List<Voucher> vouchers = voucherRepository
-                    .userGetAll(User.builder().id(id).build());
+        List<Voucher> vouchers = voucherRepository.userGetAll(id);
         return voucherMapper.entityToDtos(vouchers);
     }
 
     @Override
     public List<VoucherDTO> adminGetAll(Integer page) {
         List<Voucher> vouchers = voucherRepository
-                .adminGetAll(PageRequest.of(page-1,5));
+                .adminGetAll(PageRequest.of(page - 1, 5));
         return voucherMapper.entityToDtos(vouchers);
     }
 
@@ -101,7 +101,7 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public String delete(String code) {
         List<User> users = voucherRepository.findByVoucherCode(code);
-        userAddNotifications(users,TITLE,MESSAGE_DELETE+code,TYPE);
+        userAddNotifications(users, TITLE, MESSAGE_DELETE + code, TYPE);
         userRepository.saveAllAndFlush(users);
         voucherRepository.deleteVoucherByCodeEquals(code);
         return "Delete successfully";
@@ -114,22 +114,22 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     public void userAddNotifications(List<User> users, String title, String message, String type) {
-        if(users.size() == 0){
+        if (users.size() == 0) {
             return;
         }
-        for(User user : users){
-            Notification notification = notificationMapper.notification(title,message,type, user);
+        for (User user : users) {
+            Notification notification = notificationMapper.notification(title, message, type, user);
             notification = notificationRepository.save(notification);
             user.getNotifications().add(notification);
         }
     }
 
-    public void userAddNotificationsAndVoucher(List<User> users, Voucher voucher,String title, String message, String type) {
-        if(users.size() == 0){
+    public void userAddNotificationsAndVoucher(List<User> users, Voucher voucher, String title, String message, String type) {
+        if (users.isEmpty()) {
             return;
         }
-        for(User user : users){
-            Notification notification = notificationMapper.notification(title,message,type, user);
+        for (User user : users) {
+            Notification notification = notificationMapper.notification(title, message, type, user);
             notification = notificationRepository.save(notification);
             user.getNotifications().add(notification);
 
@@ -145,7 +145,7 @@ public class VoucherServiceImpl implements VoucherService {
         }
 
         return filterRequests.stream()
-                .<Specification<T>>map(CriteriaUtility::toSpecification)
+                .<Specification<T>>map(CriteriaUtil::toSpecification)
                 .reduce(Specification.where(null), Specification::or);
     }
 

@@ -2,8 +2,15 @@ package org.weebook.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.weebook.api.dto.OrderDTO;
 import org.weebook.api.dto.OrderFeedBackDto;
 import org.weebook.api.dto.TKProductDto;
@@ -18,70 +25,77 @@ import org.weebook.api.web.request.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    final OrderRepository orderRepository;
-    final OrderMapper orderMapper;
-    final NotificationMapper notificationMapper;
-    final UserRepository userRepository;
-    final VoucherRepository voucherRepository;
-    final ProductRepository productRepository;
-    final NotificationRepository notificationRepository;
-    final OrderStatusRepository orderStatusRepository;
-    final OrderItemRepository orderItemRepository;
-    final TransactionRepository transactionRepository;
-    final OrderFeedBackRepository orderFeedBackRepository;
+
+    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
+    private final NotificationMapper notificationMapper;
+    private final VoucherRepository voucherRepository;
+    private final ProductRepository productRepository;
+    private final NotificationRepository notificationRepository;
+    private final OrderStatusRepository orderStatusRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final TransactionRepository transactionRepository;
+    private final OrderFeedBackRepository orderFeedBackRepository;
+
+    private final SecurityContextHolderStrategy securityContextHolder
+            = SecurityContextHolder.getContextHolderStrategy();
+    private final UserDetailsService userDetailsService;
 
     @Transactional
     @Override
-    public OrderDTO order(OrderRequest orderRequest){
-        Order order = orderMapper.requestOrderToEntity(orderRequest);
-        order.setStatus("order");
+    public OrderDTO sendOrder(OrderRequest orderRequest) {
+        Order order = orderMapper.requestOrderToEntity(orderRequest, "Ordering");
 
-        //user
-        Optional<User> optionalUser = userRepository.findById(orderRequest.getUser_id());
-        if(optionalUser.isEmpty()){
-            throw new StringException("Không có tài khoản này");
+        Authentication currentUser = this.securityContextHolder.getContext().getAuthentication();
+        if (ObjectUtils.isEmpty(currentUser)) {
+            throw new AccessDeniedException("Can't order as no Authentication object found in context for current user.");
         }
-        User user = optionalUser.get();
+
+        String userName = currentUser.getName();
+        User user = (User) userDetailsService.loadUserByUsername(userName);
         order.setUser(user);
 
-        //check voucher dc phép sử dụng
-        BigDecimal voucherDiscountAmount = BigDecimal.ZERO;
-        if(orderRequest.getCode() != null){
-            List<Voucher> vouchers = voucherRepository
-                    .checkVoucherUse(user,orderRequest.getCode());
-            Voucher voucher = checkVoucher(vouchers, orderRequest.getTotalAmount(), orderRequest.getCode());
-            voucherDiscountAmount = voucher.getDiscountAmount();
+        order.setTotalDiscount(BigDecimal.ZERO);
+
+        if (!StringUtils.hasText(orderRequest.getCode())) {
+            String code = orderRequest.getCode();
+            Optional<Voucher> first = voucherRepository.findAll()
+                    .stream()
+                    .filter(v -> v.getCode().equals(code)
+                            && (Objects.isNull(v.getUser()) || v.getUser().equals(user)))
+                    .findFirst();
+
+            first.ifPresent(voucher -> {
+                checkVoucher(voucher, orderRequest.getTotalAmount(), orderRequest.getCode());
+                order.setTotalDiscount(first.get().getDiscountAmount());
+            });
         }
 
-        BigDecimal total_discount = voucherDiscountAmount
-                .add(orderRequest.getDiscount_balance());
-        if(total_discount.compareTo(orderRequest.getTotalAmount()) > 0){
-            total_discount = orderRequest.getTotalAmount();
+        BigDecimal totalDiscount = order.getTotalDiscount().add(orderRequest.getDiscountBalance());
+        if (totalDiscount.compareTo(orderRequest.getTotalAmount()) > 0) {
+            order.setTotalDiscount(orderRequest.getTotalAmount());
         }
-        order.setTotalDiscount(total_discount);
 
-        order = orderRepository.save(order);
-
-        Notification notification = notificationMapper.notification("Order","Đặt đơn hàng thành công :" + Instant.now().toString()+" /Mã đơn hàng : "+order.getId(),"order",user);
-        notificationRepository.save(notification);
-
-        OrderStatus orderStatus = orderMapper.buildOrderStatus(order,"order");
-        orderStatus = orderStatusRepository.save(orderStatus);
+        OrderStatus orderStatus = orderMapper.buildOrderStatus("order");
         order.getOrderStatuses().add(orderStatus);
+        order.getOrderItems().forEach(item -> item.setOrder(order));
+        orderStatus.setOrder(order);
 
+        Order saved = orderRepository.saveAndFlush(order);
 
-        //orderitem
-        List<OrderItem> orderItems = orderItems(orderRequest.getOrderItemRequests(),order);
-        order.getOrderItems().addAll(orderItems);
-        return orderMapper.entityOrderToDto(order);
+        Notification notification = notificationMapper.notification(
+                "Thông báo về đơn hàng",
+                "Đặt đơn hàng thành công vào lúc: " + Instant.now().toString()
+                        + ". Mã đơn hàng: " + saved.getId(),
+                "order",
+                user);
+        notificationRepository.save(notification);
+        return orderMapper.entityOrderToDto(saved);
     }
 
 
@@ -89,8 +103,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDTO updateStatus(UpdateStatusOrderRequest updateStatusOrderRequest) {
         Optional<Order> orderOptional = orderRepository.findById(updateStatusOrderRequest.getIdOrder());
-        if(orderOptional.isEmpty()){
-            throw  new StringException("Không có order này.");
+        if (orderOptional.isEmpty()) {
+            throw new StringException("Không có order này.");
         }
 
         Order order = orderOptional.get();
@@ -99,21 +113,21 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
 
         User user = order.getUser();
-        String message = "Đơn hàng "+ updateStatusOrderRequest.getIdOrder() + " đang ở trạng thái : "+updateStatusOrderRequest.getStatus();
-        Notification notification = notificationMapper.notification("Order",message, "order", user);
+        String message = "Đơn hàng " + updateStatusOrderRequest.getIdOrder() + " đang ở trạng thái : " + updateStatusOrderRequest.getStatus();
+        Notification notification = notificationMapper.notification("Order", message, "order", user);
         notificationRepository.save(notification);
 
-        OrderStatus orderStatus = orderMapper.buildOrderStatus(order, updateStatusOrderRequest.getStatus());
+        OrderStatus orderStatus = orderMapper.buildOrderStatus(updateStatusOrderRequest.getStatus());
         order.getOrderStatuses().add(orderStatus);
         orderStatus = orderStatusRepository.save(orderStatus);
         order.getOrderStatuses().add(orderStatus);
 
-        if(updateStatusOrderRequest.getStatus().equals("success")){
+        if (updateStatusOrderRequest.getStatus().equals("success")) {
             Transaction transaction = transaction(order);
             transactionRepository.save(transaction);
         }
 
-        if(updateStatusOrderRequest.getStatus().equals("cancel")){
+        if (updateStatusOrderRequest.getStatus().equals("cancel")) {
             Set<OrderItem> orderItems = order.getOrderItems();
             cancel(orderItems);
         }
@@ -122,49 +136,60 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderFeedBackDto orderfeedback(OrderFeedBackRequest orderFeedBackRequest) {
+    public OrderFeedBackDto orderFeedback(OrderFeedBackRequest orderFeedBackRequest) {
         Optional<Order> orderOptional = orderRepository.findById(orderFeedBackRequest.getIdOrder());
-        if(orderOptional.isEmpty()){
+        if (orderOptional.isEmpty()) {
             throw new StringException("T đố m hack được.");
         }
 
         Order order = orderOptional.get();
 
-        if (!order.getStatus().equals("success")){
+        if (!order.getStatus().equals("success")) {
             throw new StringException("Đơn hàng chưa hoàn thành không thể đánh giá");
         }
 
-        if(order.getOrderFeedbacks().size()>0){
+        if (!order.getOrderFeedbacks().isEmpty()) {
             throw new StringException("Bạn đã đánh gi rồi.");
         }
 
         OrderFeedback orderFeedback = orderMapper.requestOrderFeedBackToEntity(orderFeedBackRequest, order);
         orderFeedBackRepository.save(orderFeedback);
-        return orderMapper.entitiOrderFeedBackToDto(orderFeedback);
+        return orderMapper.entityOrderFeedBackToDto(orderFeedback);
     }
 
     @Override
     public List<OrderDTO> userFindByStatus(Long idUser, String status, Integer page) {
-        List<Order> orders = orderRepository.userFindByStatus( idUser,status, PageRequest.of(page-1,5));
+        List<Order> orders = orderRepository.userFindByStatus(idUser, status, PageRequest.of(page - 1, 5));
         return orderMapper.entityOrderToDtos(orders);
     }
 
     @Override
     public List<OrderDTO> adminFindByStatus(String status, Integer page) {
-        List<Order> orders = orderRepository.adminFindByStatus(status, PageRequest.of(page-1,5));
+        List<Order> orders = orderRepository.adminFindByStatus(status, PageRequest.of(page - 1, 5));
         return orderMapper.entityOrderToDtos(orders);
     }
 
     @Override
     public TkDto tkByOrder(TkOrderRequest tkOrderRequest) {
-        String[] monthYear = tkOrderRequest.getYearMonth().split("-");
-        List<TKProductDto> tkProductDto = orderItemRepository.thongke(
-                Integer.valueOf(monthYear[1]),Integer.valueOf(monthYear[0]),
-                "%"+tkOrderRequest.getNameProduct()+"%",
-                PageRequest.of(tkOrderRequest.getPage()-1,8));
+        List<TKProductDto> tkProductDto;
+        BigDecimal total;
+        if (tkOrderRequest.getYearMonth().equals("All")) {
+            tkProductDto = orderItemRepository.thongke(
+                    "%" + tkOrderRequest.getNameProduct() + "%",
+                    PageRequest.of(tkOrderRequest.getPage() - 1, 8));
+            total = orderItemRepository.thongketotal(
+                    "%" + tkOrderRequest.getNameProduct() + "%");
+        } else {
+            String[] monthYear = tkOrderRequest.getYearMonth().split("-");
+            tkProductDto = orderItemRepository.thongke(
+                    Integer.valueOf(monthYear[1]),
+                    Integer.valueOf(monthYear[0]),
+                    "%" + tkOrderRequest.getNameProduct() + "%",
+                    PageRequest.of(tkOrderRequest.getPage() - 1, 8));
 
-        BigDecimal total = orderItemRepository.thongketotal(Integer.valueOf(monthYear[1]),Integer.valueOf(monthYear[0]),
-                "%"+tkOrderRequest.getNameProduct()+"%");
+            total = orderItemRepository.thongketotal(Integer.valueOf(monthYear[1]), Integer.parseInt(monthYear[0]),
+                    "%" + tkOrderRequest.getNameProduct() + "%");
+        }
         return TkDto
                 .builder()
                 .total(total)
@@ -174,14 +199,17 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<String> getYearMonth() {
-        return orderRepository.findAllMonthYear();
+        List<String> yearMonth = new ArrayList<>();
+        yearMonth.add("All");
+        yearMonth.addAll(orderRepository.findAllMonthYear());
+        return yearMonth;
     }
 
-    Transaction transaction(Order order){
+    Transaction transaction(Order order) {
         User user = order.getUser();
         Transaction transactionOld = new Transaction();
         BigDecimal pre_trade_amount = BigDecimal.ZERO;
-        if(user.getTransactions().size() > 0){
+        if (!user.getTransactions().isEmpty()) {
             transactionOld = user.getTransactions().get(0);
             pre_trade_amount = transactionOld.getPostTradeAmount();
         }
@@ -190,48 +218,43 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal total_amount = amount.multiply(BigDecimal.valueOf(0.1));
         BigDecimal post_trade_amount = pre_trade_amount.add(total_amount);
         String action = "Order";
-        return orderMapper.transaction(user,order,action, pre_trade_amount, amount, post_trade_amount);
+        return orderMapper.transaction(user, order, action, pre_trade_amount, amount, post_trade_amount);
     }
 
 
-    void cancel(Set<OrderItem> orderItems){
-        for (OrderItem orderItem: orderItems){
+    void cancel(Set<OrderItem> orderItems) {
+        for (OrderItem orderItem : orderItems) {
             Product product = productRepository.findById(orderItem.getProduct().getId()).orElse(new Product());
-            product.setQuantity(product.getQuantity()+orderItem.getQuantity());
+            product.setQuantity(product.getQuantity() + orderItem.getQuantity());
             productRepository.save(product);
         }
     }
 
-    List<OrderItem> orderItems(List<OrderItemRequest> orderItemRequests, Order order){
-        List<OrderItem> orderItems  = new ArrayList<>();
-        for (OrderItemRequest orderItemRequest: orderItemRequests){
+    List<OrderItem> orderItems(List<OrderItemRequest> orderItemRequests, Order order) {
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (OrderItemRequest orderItemRequest : orderItemRequests) {
             try {
-                OrderItem orderItem = orderMapper.requestItemToEntity(orderItemRequest,order);
+                OrderItem orderItem = orderMapper.requestItemToEntity(orderItemRequest, order);
                 orderItem = orderItemRepository.save(orderItem);
                 orderItems.add(orderItem);
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new StringException("Sản phẩm số lượng k đủ");
             }
         }
         return orderItems;
     }
 
-    Voucher checkVoucher(List<Voucher> vouchers, BigDecimal total_amount, String codeVoucher){
-        if(vouchers.size() == 0){
-            throw new StringException("Voucher này chỉ dành cho người đuợc chọn : : " + codeVoucher);
-        }
-        Voucher voucher = vouchers.get(0);
-        if(voucher.getCondition().compareTo(total_amount) > 0){
-            throw new StringException("Bạn không đủ điều kiện sử dụng voucher : "+codeVoucher);
+    void checkVoucher(Voucher voucher, BigDecimal totalAmount, String codeVoucher) {
+        if (voucher.getCondition().compareTo(totalAmount) > 0) {
+            throw new StringException("Bạn không đủ điều kiện sử dụng voucher: " + codeVoucher);
         }
 
-        if(!voucher.getValidFrom().isBefore(Instant.now())){
-            throw new StringException("Voucher chưa đến ngày sử dụng voucher : "+codeVoucher);
+        if (!voucher.getValidFrom().isBefore(Instant.now())) {
+            throw new StringException("Voucher chưa đến ngày sử dụng voucher: " + codeVoucher);
         }
 
-        if(!voucher.getValidTo().isAfter(Instant.now())){
-            throw new StringException("Voucher quá hạn sử dụng voucher : "+codeVoucher);
+        if (!voucher.getValidTo().isAfter(Instant.now())) {
+            throw new StringException("Voucher quá hạn sử dụng voucher : " + codeVoucher);
         }
-        return voucher;
     }
 }

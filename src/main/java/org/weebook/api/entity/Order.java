@@ -78,7 +78,7 @@ public class Order implements Serializable {
     @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "order", cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     @OrderBy(value = "id desc")
     @Builder.Default
@@ -86,7 +86,6 @@ public class Order implements Serializable {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id")
-
     private User user;
 
     @Override

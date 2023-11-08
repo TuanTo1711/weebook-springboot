@@ -11,29 +11,27 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.CompletableFuture;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class EmailSender {
-
     private final JavaMailSender mailSender = new JavaMailSenderImpl();
 
     @Async
-    public CompletableFuture<Void> sendOTPByEmail(String recipientEmail, String otp) {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
+    public void sendOTPEmail(String toEmail, String otpCode) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 
         try {
-            helper.setTo(recipientEmail);
-            helper.setSubject("Mã OTP xác minh");
-            helper.setText("Mã OTP của bạn là: " + otp);
-            log.info("Mã OTP của bạn là: " + otp);
+            messageHelper.setFrom("no-reply");
+            messageHelper.setTo(toEmail);
+            messageHelper.setSubject("Mã OTP của bạn");
+            messageHelper.setText("Mã OTP của bạn là: " + otpCode);
+
+            mailSender.send(mimeMessage);
         } catch (MessagingException e) {
+            // Xử lý lỗi gửi email
             e.printStackTrace();
         }
-        mailSender.send(message);
-        return CompletableFuture.completedFuture(null);
     }
 }

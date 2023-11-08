@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 import org.weebook.api.dto.OrderDTO;
 import org.weebook.api.dto.OrderFeedBackDto;
-import org.weebook.api.dto.TKProductDto;
 import org.weebook.api.dto.TkDto;
 import org.weebook.api.service.OrderService;
 import org.weebook.api.web.request.OrderFeedBackRequest;
@@ -21,39 +20,41 @@ import java.util.List;
 @RequestMapping("api/v1/order")
 @RequiredArgsConstructor
 public class OrderController {
-     final OrderService orderService;
+
+    private final OrderService orderService;
+
     @PostMapping
     public OrderDTO order(@Valid @RequestBody OrderRequest orderRequest) {
-        return orderService.order(orderRequest);
+        return orderService.sendOrder(orderRequest);
     }
 
     @PostMapping("/update/status")
-    public OrderDTO updateStatus(@RequestBody UpdateStatusOrderRequest updateStatusOrderRequest){
+    public OrderDTO updateStatus(@RequestBody UpdateStatusOrderRequest updateStatusOrderRequest) {
         return orderService.updateStatus(updateStatusOrderRequest);
     }
 
     @PostMapping("/feedback")
     public OrderFeedBackDto feedback(@Valid @RequestBody OrderFeedBackRequest orderFeedBackRequest) {
-        return orderService.orderfeedback(orderFeedBackRequest);
+        return orderService.orderFeedback(orderFeedBackRequest);
     }
 
     @GetMapping("/user/find/status")
-    public List<OrderDTO> userFindByStatus(@Param("idUser") Long idUser, @Param("status") String status, @Param("page") Integer page){
+    public List<OrderDTO> userFindByStatus(@RequestParam("idUser") Long idUser, @RequestParam("status") String status, @RequestParam("page") Integer page) {
         return orderService.userFindByStatus(idUser, status, page);
     }
 
     @GetMapping("/admin/find/status")
-    public List<OrderDTO> userFindByStatus(@Param("status") String status, @Param("page") Integer page){
+    public List<OrderDTO> userFindByStatus(@Param("status") String status, @Param("page") Integer page) {
         return orderService.adminFindByStatus(status, page);
     }
 
     @PostMapping("/tk/by/order")
-    public TkDto tkByOrder(@RequestBody TkOrderRequest tkOrderRequest){
+    public TkDto tkByOrder(@RequestBody TkOrderRequest tkOrderRequest) {
         return orderService.tkByOrder(tkOrderRequest);
     }
 
-    @GetMapping("getYearMonth")
-    public List<String> getYearMonth(){
+    @GetMapping("get-by-year")
+    public List<String> getYearMonth() {
         return orderService.getYearMonth();
     }
 }

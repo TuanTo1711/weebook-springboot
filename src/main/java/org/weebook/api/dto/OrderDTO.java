@@ -10,20 +10,13 @@ import java.util.Set;
 @Getter
 @Setter
 public class OrderDTO {
-    Long id;
+    private Long id;
     private Instant orderDate;
     private BigDecimal totalAmount;
-
     private BigDecimal totalDiscount;
-
     private String deliveryAddress;
-
-    UserDto user;
-
+    private UserDto user;
     private Set<OrderItemDTO> orderItems;
-
-    Set<OrderStatusDTO> orderStatuses;
-
-
-    OrderFeedBackDto orderFeedbacks;
+    private Set<OrderStatusDTO> orderStatuses;
+    private OrderFeedBackDto orderFeedbacks;
 }
