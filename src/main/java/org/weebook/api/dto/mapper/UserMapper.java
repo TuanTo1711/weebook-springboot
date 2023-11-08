@@ -30,7 +30,10 @@ public interface UserMapper {
     User toEntity(SignUpRequest request, RoleDto roleDto);
 
     @InheritInverseConfiguration
-    User partialUpdate(UserDto userDto);
+    @Mapping(target = "id", ignore = true)
+    User partialUpdate(UserDto userDto, @MappingTarget User user);
 
+    @Mapping(target = "userOld" , source = "userDto")
+    @Mapping(target = "userNew", source = "dto")
     UpdateProfileResponse toProfileUpdated(UserDto userDto, UserDto dto);
 }

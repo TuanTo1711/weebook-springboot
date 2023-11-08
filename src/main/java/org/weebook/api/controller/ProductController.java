@@ -3,7 +3,8 @@ package org.weebook.api.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
-import org.weebook.api.dto.ProductDto;
+import org.weebook.api.dto.ProductDetail;
+import org.weebook.api.dto.ProductInfo;
 import org.weebook.api.service.ProductService;
 import org.weebook.api.web.request.PagingRequest;
 
@@ -17,20 +18,21 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("/save")
-    public ProductDto saveProduct(@RequestBody ProductDto productDto) {
-        return productService.saveProduct(productDto);
-    }
-
-    @PostMapping("/save-list")
-    public List<ProductDto> saveList(@RequestBody List<ProductDto> productDto) {
-        return productService.saveListProduct(productDto);
+    public ProductDetail saveProduct(@RequestBody ProductDetail productInfo) {
+        return productService.saveProduct(productInfo);
     }
 
     @GetMapping("/find-all-by")
-    public PageImpl<ProductDto> filterProductsBy(
+    public PageImpl<ProductInfo> filterProductsBy(
+            @RequestParam(name = "parent", required = false) String parent,
             @RequestParam(name = "category", required = false) String categoryName,
             @ModelAttribute PagingRequest pagingRequest) {
-        return productService.filterProducts(categoryName, pagingRequest);
+        return productService.filterProducts(parent, categoryName, pagingRequest);
+    }
+
+    @GetMapping("/get-by-name")
+    public ProductDetail getProductByName(@RequestParam("name") String name) {
+        return productService.findByName(name);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -39,13 +41,13 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public List<ProductDto> findByName(@RequestParam String name) {
-        return productService.findByName(name);
+    public List<ProductInfo> findByName(@RequestParam String name) {
+        return productService.search(name);
     }
 
     @GetMapping("/suggest")
-    public List<ProductDto> findByNameSuggest(@ModelAttribute PagingRequest pagingRequest, @RequestParam String name) {
-        return productService.findByNameSuggest(name);
+    public List<String> findByNameSuggest(@ModelAttribute PagingRequest pagingRequest, @RequestParam String name) {
+        return productService.suggest(name);
     }
 
 }

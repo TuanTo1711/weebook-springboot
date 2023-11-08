@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'TZ=Asia/Ho_Chi_Minh'
+      - 'POSTGRES_DB=db-schema'
+      - 'POSTGRES_PASSWORD=db-user'
+      - 'POSTGRES_USER=db-password'
+    ports:
+      - '5432:5432'

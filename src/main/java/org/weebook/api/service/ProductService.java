@@ -1,25 +1,24 @@
 package org.weebook.api.service;
 
 import org.springframework.data.domain.PageImpl;
-import org.weebook.api.dto.ProductDto;
+import org.weebook.api.dto.ProductDetail;
+import org.weebook.api.dto.ProductInfo;
 import org.weebook.api.web.request.PagingRequest;
 
 import java.util.List;
 
 public interface ProductService {
-    ProductDto saveProduct(ProductDto productDto);
+    ProductDetail saveProduct(ProductDetail productInfo);
 
-    PageImpl<ProductDto> getAll(PagingRequest pagingRequest);
+    ProductDetail update(ProductDetail productInfo, Long id);
 
-    ProductDto update(ProductDto productDto, Long id);
+    PageImpl<ProductInfo> filterProducts(String parent, String categoryName, PagingRequest pagingRequest);
 
-    List<ProductDto> saveListProduct(List<ProductDto> booksDTO);
+    List<ProductInfo> search(String name);
 
-    PageImpl<ProductDto> filterProducts(String categoryName, PagingRequest pagingRequest);
-
-    List<ProductDto> findByName(String name);
-
-    List<ProductDto> findByNameSuggest(String name);
+    List<String> suggest(String name);
 
     void delete(Long id);
+
+    ProductDetail findByName(String name);
 }

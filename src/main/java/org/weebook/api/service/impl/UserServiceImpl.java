@@ -14,8 +14,12 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.weebook.api.dto.UserDto;
+import org.weebook.api.dto.mapper.UserMapper;
 import org.weebook.api.entity.User;
 import org.weebook.api.repository.UserRepository;
+
+import java.util.Optional;
 
 import static org.weebook.api.exception.ErrorMessages.ACCOUNT_NOT_FOUND_ERROR;
 
@@ -29,6 +33,7 @@ public class UserServiceImpl implements UserDetailsManager {
     private final PasswordEncoder passwordEncoder;
     private SecurityContextHolderStrategy securityContextHolderStrategy
             = SecurityContextHolder.getContextHolderStrategy();
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -47,10 +52,9 @@ public class UserServiceImpl implements UserDetailsManager {
 
     @Override
     public void updateUser(UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        Assert.isTrue(this.userExists(username), "User not exists");
         User user = (User) userDetails;
-        this.userRepository.save(user);
+        Assert.isTrue(this.userExists(user.getUsername()), "User not exits");
+        userRepository.save(user);
     }
 
     @Override

@@ -12,5 +12,5 @@ public class OrderItemDTO {
 
     private BigDecimal unitPrice;
 
-    ProductDto product;
+    ProductInfo product;
 }

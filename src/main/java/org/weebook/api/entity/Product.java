@@ -125,7 +125,7 @@ public class Product implements Serializable {
     @JoinColumn(name = "event_id")
     private Event event;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<Author> authors = new LinkedList<>();
@@ -134,7 +134,6 @@ public class Product implements Serializable {
     @JoinTable(name = "product_genres",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "genres_id"))
-//    @ManyToMany(mappedBy = "products")
     @ToString.Exclude
     @Builder.Default
     private List<Genre> genres = new LinkedList<>();
@@ -149,7 +148,7 @@ public class Product implements Serializable {
     @Builder.Default
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE)
     @ToString.Exclude
     @Builder.Default
     private Set<Review> reviews = new LinkedHashSet<>();

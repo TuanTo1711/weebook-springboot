@@ -22,7 +22,7 @@ target/
 *.iws
 *.iml
 *.ipr
-.jpb
+.jpb/**
 
 ### NetBeans ###
 /nbproject/private/
