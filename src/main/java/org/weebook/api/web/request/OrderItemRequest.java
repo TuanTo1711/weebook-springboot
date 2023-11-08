@@ -2,7 +2,7 @@ package org.weebook.api.web.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.weebook.api.dto.ProductDto;
+import org.weebook.api.dto.ProductInfo;
 
 import java.math.BigDecimal;
 
@@ -14,7 +14,7 @@ public class OrderItemRequest {
     Integer quantity;
 
     BigDecimal unitPrice;
-    private ProductDto product;
+    private ProductInfo product;
 
 
 }

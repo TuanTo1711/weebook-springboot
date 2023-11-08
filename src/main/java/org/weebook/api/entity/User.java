@@ -7,6 +7,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +28,7 @@ import java.util.*;
 @ToString
 @Entity
 @Table(name = "\"user\"")
+@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
 
     @Serial
@@ -158,7 +160,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return StringUtils.hasText(otpCode);
+        return !StringUtils.hasText(otpCode);
     }
 
     @Override

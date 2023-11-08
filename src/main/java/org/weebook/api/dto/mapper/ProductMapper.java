@@ -1,7 +1,9 @@
 package org.weebook.api.dto.mapper;
 
 import org.mapstruct.*;
-import org.weebook.api.dto.ProductDto;
+import org.weebook.api.dto.ProductDetail;
+import org.weebook.api.dto.ProductInfo;
+import org.weebook.api.dto.ReviewDto;
 import org.weebook.api.entity.*;
 
 import java.util.List;
@@ -10,9 +12,12 @@ import java.util.List;
         componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ProductMapper {
 
-    Product toEntity(ProductDto productDto);
+    Product toEntity(ProductDetail productInfo);
 
-    ProductDto toDto(Product product);
+    @Mapping(target = "totalReviews", expression = "java(product.getReviews().size())")
+    ProductInfo toInfo(Product product);
+
+    ProductDetail toDetail(Product product);
 
     @AfterMapping
     default void linkReviews(@MappingTarget Product product) {
@@ -21,11 +26,11 @@ public interface ProductMapper {
 
     @Mapping(target = "name", expression = "java( review.getUser().getFirstName() + \" \" + review.getUser().getLastName() )")
     @Mapping(target = "avatar", source = "user.avatarUrl")
-    ProductDto.ReviewDto toReviewDto(Review review);
+    ReviewDto toReviewDto(Review review);
 
     @InheritConfiguration
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void partialUpdate(ProductDto productDto, @MappingTarget Product product);
+    void partialUpdate(ProductDetail productInfo, @MappingTarget Product product);
 
     default String mapToImage(ProductsImage image) {
         return image.getImageUrl();
@@ -48,7 +53,5 @@ public interface ProductMapper {
     @Mapping(target = "name", source = "genreName")
     Genre mapToProductGenre(String genreName);
 
-    List<Product> listToEntity(List<ProductDto> productDto);
-
-    List<ProductDto> listToDto(List<Product> productDto);
+    List<ProductInfo> listToInfo(List<Product> productDto);
 }

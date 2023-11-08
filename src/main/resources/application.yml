@@ -13,6 +13,8 @@ spring:
       hibernate:
         format_sql: true
         show-sql: true
+  cache:
+    type: caffeine
 logging:
   level:
     root: INFO

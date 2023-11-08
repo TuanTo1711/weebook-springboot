@@ -46,10 +46,6 @@ public class Category implements Serializable {
     @Builder.Default
     private List<Category> children = new ArrayList<>();
 
-    @OneToMany(mappedBy = "category")
-    @Builder.Default
-    private List<Product> products = new LinkedList<>();
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

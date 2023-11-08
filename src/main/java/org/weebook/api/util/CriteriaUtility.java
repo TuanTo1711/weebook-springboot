@@ -10,6 +10,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
+import org.weebook.api.entity.Category;
+import org.weebook.api.entity.Product;
 import org.weebook.api.exception.StringException;
 import org.weebook.api.web.request.FilterRequest;
 
@@ -33,7 +35,9 @@ import static org.springframework.data.domain.Sort.Direction.fromString;
  */
 public class CriteriaUtility {
 
-    private static final Slugify slugify = Slugify.builder().build();
+    private static final Slugify slugify = Slugify.builder()
+//            .customReplacement("[^a-z0-9\\-_.\\s]+", "-")
+            .build();
 
     private CriteriaUtility() {
     }
@@ -346,6 +350,8 @@ public class CriteriaUtility {
                 return null;
             }
 
+            System.out.println(slugify.slugify(value));
+
             Path<String> path = getPath(field, root);
             return criteriaBuilder.like(toSlug(criteriaBuilder, path), slugify.slugify(value));
         };
@@ -408,6 +414,14 @@ public class CriteriaUtility {
                 String.class,
                 path
         );
+    }
+
+    public static Specification<Product> productsByCategoryName(List<Category> categoryIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (CollectionUtils.isEmpty(categoryIds)) return null;
+
+            return getPath("category", root).in(categoryIds);
+        };
     }
 
     public enum CriteriaType {

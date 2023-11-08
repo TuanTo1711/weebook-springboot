@@ -1,6 +1,7 @@
 package org.weebook.api.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,12 +18,14 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/find-all")
+    @Cacheable("getAllCategory")
     public List<CategoryDto> getAllCategory() {
         return categoryService.loadAllHierarchyCategory();
     }
 
     @GetMapping("/find-all-by")
-    public List<CategoryDto> getAllCategory(@RequestParam(required = false) String name) {
+    @Cacheable(value = "getAllCategoryByName", key = "#name")
+    public List<CategoryDto> getAllCategoryByName(@RequestParam(required = false) String name) {
         return categoryService.loadCategoryByName(name);
     }
 
