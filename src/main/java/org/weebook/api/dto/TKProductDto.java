@@ -20,18 +20,17 @@ public class TKProductDto {
 
     String name;
 
-    @ElementCollection
-    Set<String> images = null;
+    String image;
 
     Long quantity;
 
     BigDecimal total;
 
 
-    public TKProductDto(Long id, String name, Set<String> images, Long quantity, BigDecimal total) {
+    public TKProductDto(Long id, String name, String image, Long quantity, BigDecimal total) {
         this.id = id;
         this.name = name;
-        this.images = images;
+        this.image = image;
         this.quantity = quantity;
         this.total = total;
     }

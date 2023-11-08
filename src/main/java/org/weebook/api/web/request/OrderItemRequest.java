@@ -9,12 +9,8 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class OrderItemRequest {
-    Long product_id;
+    private Integer quantity;
 
-    Integer quantity;
-
-    BigDecimal unitPrice;
+    private BigDecimal unitPrice;
     private ProductInfo product;
-
-
 }

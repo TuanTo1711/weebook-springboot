@@ -12,10 +12,13 @@ import org.weebook.api.dto.mapper.VoucherMapper;
 import org.weebook.api.entity.Notification;
 import org.weebook.api.entity.User;
 import org.weebook.api.entity.Voucher;
+import org.weebook.api.exception.StringException;
+import org.weebook.api.repository.NotificationRepository;
 import org.weebook.api.repository.UserRepository;
 import org.weebook.api.repository.VoucherRepository;
 import org.weebook.api.service.VoucherService;
 import org.weebook.api.util.CriteriaUtility;
+import org.weebook.api.web.request.AddVoucherVaoUserRequest;
 import org.weebook.api.web.request.FilterRequest;
 import org.weebook.api.web.request.VoucherRequest;
 
@@ -24,77 +27,114 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class VoucherServiceImpl implements VoucherService {
-    private final UserRepository userRepo;
-    private final VoucherRepository voucherRepo;
-    private final VoucherMapper voucherMapper;
-    private final NotificationMapper notificationMapper;
-
-    private final String MESSAGE_DELETE = "Voucher đã bị xóa : ";
-    private final String TITLE = "Voucher";
-    private final String TYPE = "voucher";
-
+    final UserRepository userRepository;
+    final VoucherRepository voucherRepository;
+    final VoucherMapper voucherMapper;
+    final NotificationMapper notificationMapper;
+    final NotificationRepository notificationRepository;
+//    final OrderRepo orderRepo;
+    final String MESSAGE_DELETE = "Voucher đã bị xóa : ";
+    final String TITLE = "Voucher";
+    final String TYPE = "voucher";
     @Override
     public VoucherDTO create(VoucherRequest voucherRequest) {
         Specification<User> specification = getSpecificationOr(voucherRequest.getFilterRequest());
-        List<User> users = userRepo.findAll(specification);
+        List<User> users = userRepository.findAll(specification);
         Voucher voucher = voucherMapper.requestToEntity(voucherRequest);
-        if (voucherRequest.getFilterRequest() == null) {
+        if(voucherRequest.getFilterRequest() == null){
             userAddNotifications(users, TITLE, "Bạn có 1 voucher mới :" + voucher.getCode(), TYPE);
-            voucherRepo.save(voucher);
-        } else {
+            voucherRepository.save(voucher);
+        }else {
             userAddNotificationsAndVoucher(users, voucher, TITLE, "Bạn có 1 voucher mới :" + voucher.getCode(), TYPE);
         }
-        userRepo.saveAllAndFlush(users);
         return voucherMapper.entityToDto(voucher);
+    }
+
+    @Transactional
+    @Override
+    public VoucherDTO create(AddVoucherVaoUserRequest addVoucherVaoUserRequest) {
+        List<Voucher> vouchers = voucherRepository
+                .findByCodeEquals(addVoucherVaoUserRequest
+                        .getVoucherDTO().getCode());
+        if(vouchers.size() == 0){
+            return null;
+        }
+
+        Voucher checkVoucher = vouchers.get(0);
+        if(checkVoucher.getUser() == null){
+            List<User> users = userRepository.findAll();
+            String message = "Xin loi vì voucher : "+addVoucherVaoUserRequest.getVoucherDTO().getCode() + " chỉ dành cho những khách đặc biệt";
+            userAddNotifications(users, "Voucher",message, "voucher");
+            voucherRepository.deleteVoucherByCodeEquals(addVoucherVaoUserRequest
+                    .getVoucherDTO().getCode());
+        }
+
+        Specification<User> specification = getSpecificationOr(addVoucherVaoUserRequest.getFilterRequest());
+        List<User> users = userRepository.findAll(specification);
+
+        if(addVoucherVaoUserRequest.getFilterRequest() == null){
+            throw new StringException("Lần trước nhậu quên nhập giờ thì nhớ nha.");
+        }
+
+        Voucher voucher = voucherMapper.dtoToEntity(addVoucherVaoUserRequest.getVoucherDTO());
+
+        userAddNotificationsAndVoucher(users, voucher, TITLE, "Bạn có 1 voucher mới :" + voucher.getCode(), TYPE);
+
+        return addVoucherVaoUserRequest.getVoucherDTO();
     }
 
     @Override
     public List<VoucherDTO> userGetAll(Long id) {
-        List<Voucher> vouchers = voucherRepo
-                .userGetAll(User.builder().id(id).build());
+        List<Voucher> vouchers = voucherRepository
+                    .userGetAll(User.builder().id(id).build());
         return voucherMapper.entityToDtos(vouchers);
     }
 
     @Override
     public List<VoucherDTO> adminGetAll(Integer page) {
-        return voucherRepo.adminGetAll(PageRequest.of(page - 1, 5))
-                .stream().map(voucherMapper::entityToDto)
-                .toList();
+        List<Voucher> vouchers = voucherRepository
+                .adminGetAll(PageRequest.of(page-1,5));
+        return voucherMapper.entityToDtos(vouchers);
     }
 
     @Transactional
     @Override
     public String delete(String code) {
-        List<User> users = voucherRepo.findByVoucherCode(code);
-        userAddNotifications(users, TITLE, MESSAGE_DELETE + code, TYPE);
-        userRepo.saveAllAndFlush(users);
-        voucherRepo.delete(code);
+        List<User> users = voucherRepository.findByVoucherCode(code);
+        userAddNotifications(users,TITLE,MESSAGE_DELETE+code,TYPE);
+        userRepository.saveAllAndFlush(users);
+        voucherRepository.deleteVoucherByCodeEquals(code);
         return "Delete successfully";
     }
 
     @Override
     public VoucherDTO findByCode(String code) {
-        return voucherRepo.findByCode(code);
+        Voucher voucher = voucherRepository.findByCode(code);
+        return voucherMapper.entityToDto(voucher);
     }
 
     public void userAddNotifications(List<User> users, String title, String message, String type) {
-        if (users.size() == 0) {
+        if(users.size() == 0){
             return;
         }
-        for (User user : users) {
-            Notification notification = notificationMapper.notification(title, message, type, user);
+        for(User user : users){
+            Notification notification = notificationMapper.notification(title,message,type, user);
+            notification = notificationRepository.save(notification);
             user.getNotifications().add(notification);
         }
     }
 
-    public void userAddNotificationsAndVoucher(List<User> users, Voucher voucher, String title, String message, String type) {
-        if (users.size() == 0) {
+    public void userAddNotificationsAndVoucher(List<User> users, Voucher voucher,String title, String message, String type) {
+        if(users.size() == 0){
             return;
         }
-        for (User user : users) {
-            Notification notification = notificationMapper.notification(title, message, type, user);
+        for(User user : users){
+            Notification notification = notificationMapper.notification(title,message,type, user);
+            notification = notificationRepository.save(notification);
             user.getNotifications().add(notification);
+
             Voucher voucherNew = voucherMapper.entityToEntity(voucher, user);
+            voucherNew = voucherRepository.save(voucherNew);
             user.getVouchers().add(voucherNew);
         }
     }

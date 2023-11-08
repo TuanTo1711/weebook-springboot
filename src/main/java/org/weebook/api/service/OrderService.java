@@ -3,8 +3,10 @@ package org.weebook.api.service;
 import org.weebook.api.dto.OrderDTO;
 import org.weebook.api.dto.OrderFeedBackDto;
 import org.weebook.api.dto.TKProductDto;
+import org.weebook.api.dto.TkDto;
 import org.weebook.api.web.request.OrderFeedBackRequest;
 import org.weebook.api.web.request.OrderRequest;
+import org.weebook.api.web.request.TkOrderRequest;
 import org.weebook.api.web.request.UpdateStatusOrderRequest;
 
 import java.util.List;
@@ -20,5 +22,7 @@ public interface OrderService {
 
     List<OrderDTO> adminFindByStatus(String status, Integer page);
 
-    List<TKProductDto> tkByOrder();
+    TkDto tkByOrder(TkOrderRequest tkOrderRequest);
+
+    List<String> getYearMonth();
 }
