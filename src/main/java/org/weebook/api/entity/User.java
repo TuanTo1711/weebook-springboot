@@ -80,7 +80,7 @@ public class User implements UserDetails {
     private Instant createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(name = "update_at")
     private Instant updateAt;
 
     @Column(name = "deleted_date")

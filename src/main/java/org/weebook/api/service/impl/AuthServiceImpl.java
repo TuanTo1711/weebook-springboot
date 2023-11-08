@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.weebook.api.config.DefaultAppRole;
@@ -11,6 +12,7 @@ import org.weebook.api.dto.RoleDto;
 import org.weebook.api.dto.UserDto;
 import org.weebook.api.dto.mapper.UserMapper;
 import org.weebook.api.entity.User;
+import org.weebook.api.repository.UserRepository;
 import org.weebook.api.service.AuthService;
 import org.weebook.api.service.OTPService;
 import org.weebook.api.util.JwtUtils;
@@ -29,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final OTPService otpService;
     private final JwtUtils jwtUtils;
+    private final UserRepository userRepository;
 
     @Override
     public JwtResponse login(SignInRequest signInRequest) {
@@ -54,9 +57,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UpdateProfileResponse updateProfile(UserDto userDto) {
-        User entity = userMapper.partialUpdate(userDto);
+        User entity = userRepository.findByUsername(userDto.username()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        UserDto userDtoOld = userMapper.toDto(entity);
+        userMapper.partialUpdate(userDto, entity);
         userDetailsService.updateUser(entity);
-        return userMapper.toProfileUpdated(userDto, userMapper.toDto(entity));
+        return userMapper.toProfileUpdated(userDtoOld, userMapper.toDto(entity));
     }
 
     @Override

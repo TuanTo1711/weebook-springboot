@@ -10,3 +10,16 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+---
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: hoangtantuan03@gmail.com
+    password: fmjd ohww xhbg xqsf
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
