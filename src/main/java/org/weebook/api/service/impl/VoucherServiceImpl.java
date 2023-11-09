@@ -3,9 +3,16 @@ package org.weebook.api.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.weebook.api.dto.VoucherDTO;
 import org.weebook.api.dto.mapper.NotificationMapper;
 import org.weebook.api.dto.mapper.VoucherMapper;
@@ -20,6 +27,7 @@ import org.weebook.api.service.VoucherService;
 import org.weebook.api.util.CriteriaUtil;
 import org.weebook.api.web.request.AddVoucherVaoUserRequest;
 import org.weebook.api.web.request.FilterRequest;
+import org.weebook.api.web.request.PagingRequest;
 import org.weebook.api.web.request.VoucherRequest;
 
 import java.util.List;
@@ -32,6 +40,9 @@ public class VoucherServiceImpl implements VoucherService {
     final VoucherMapper voucherMapper;
     final NotificationMapper notificationMapper;
     final NotificationRepository notificationRepository;
+    final UserDetailsService userDetailsService;
+    private final SecurityContextHolderStrategy securityContextHolder
+            = SecurityContextHolder.getContextHolderStrategy();
     //    final OrderRepo orderRepo;
     final String MESSAGE_DELETE = "Voucher đã bị xóa : ";
     final String TITLE = "Voucher";
@@ -85,15 +96,23 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public List<VoucherDTO> userGetAll(Long id) {
-        List<Voucher> vouchers = voucherRepository.userGetAll(id);
+    public List<VoucherDTO> userGetAll() {
+        Authentication currentUser = this.securityContextHolder.getContext().getAuthentication();
+        if (ObjectUtils.isEmpty(currentUser)) {
+            throw new AccessDeniedException("Can't order as no Authentication object found in context for current user.");
+        }
+
+        String userName = currentUser.getName();
+        User user = (User) userDetailsService.loadUserByUsername(userName);
+        System.out.println(user.getId());
+        List<Voucher> vouchers = voucherRepository.userGetAll(user.getId());
         return voucherMapper.entityToDtos(vouchers);
     }
 
     @Override
-    public List<VoucherDTO> adminGetAll(Integer page) {
+    public List<VoucherDTO> adminGetAll(PagingRequest pagingRequest) {
         List<Voucher> vouchers = voucherRepository
-                .adminGetAll(PageRequest.of(page - 1, 5));
+                .adminGetAll(PageRequest.of(pagingRequest.getPageNumber() - 1, pagingRequest.getPageSize()));
         return voucherMapper.entityToDtos(vouchers);
     }
 

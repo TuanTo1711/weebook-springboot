@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.weebook.api.dto.VoucherDTO;
 import org.weebook.api.service.VoucherService;
 import org.weebook.api.web.request.AddVoucherVaoUserRequest;
+import org.weebook.api.web.request.PagingRequest;
 import org.weebook.api.web.request.VoucherRequest;
 
 import java.util.List;
@@ -33,14 +34,14 @@ public class VoucherController {
         return voucherService.findByCode(code);
     }
 
-    @GetMapping("/user/get/all")
-    List<VoucherDTO> userGetAll(@Param("id") Long id){
-        return voucherService.userGetAll(id);
+    @PostMapping("/user/get/all")
+    List<VoucherDTO> userGetAll(){
+        return voucherService.userGetAll();
     }
 
-    @GetMapping("/admin/get/all")
-    List<VoucherDTO> adminGetAll(@Param("page") Integer page){
-        return voucherService.adminGetAll(page);
+    @PostMapping("/admin/get/all")
+    List<VoucherDTO> adminGetAll(@RequestBody PagingRequest pagingRequest){
+        return voucherService.adminGetAll(pagingRequest);
     }
 
     @DeleteMapping("/delete/{code}")

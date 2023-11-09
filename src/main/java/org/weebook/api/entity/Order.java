@@ -39,8 +39,11 @@ public class Order implements Serializable {
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
-    @Column(name = "total_discount")
-    private BigDecimal totalDiscount;
+    @Column(name = "discount_balance")
+    private BigDecimal discountBalance;
+
+    @Column(name = "discount_voucher")
+    private BigDecimal discountVoucher;
 
     @Column(name = "delivery_address", length = Integer.MAX_VALUE)
     private String deliveryAddress;

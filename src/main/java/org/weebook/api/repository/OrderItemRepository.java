@@ -32,20 +32,26 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     List<TKProductDto> thongke(@Param("name") String name, Pageable pageable);
 
     @Query("""
-                Select cast(sum(o.quantity * o.unitPrice) as BIGDECIMAL)
+                select sum(total)
+                from (
+                    Select cast(sum(o.quantity * o.unitPrice) as BIGDECIMAL) as total
                 from OrderItem o
                 where o.product.name like :name and o.order.status = 'success'
                 group by o.product.id, o.product.name,o.product.thumbnail
+                ) as A
             """)
     BigDecimal thongketotal(@Param("name") String name);
 
     @Query("""
-                Select cast(sum(o.quantity * o.unitPrice) as BIGDECIMAL)
+                select sum(total)
+                from (
+                    Select cast(sum(o.quantity * o.unitPrice) as BIGDECIMAL) as total
                 from OrderItem o
                 where o.product.name like :name and o.order.status = 'success' and
                       month(o.order.orderDate) = :month and
                       year(o.order.orderDate) = :year
                 group by o.product.id, o.product.name,o.product.thumbnail
+                ) as A
             """)
     BigDecimal thongketotal(Integer month, Integer year, @Param("name") String name);
 }

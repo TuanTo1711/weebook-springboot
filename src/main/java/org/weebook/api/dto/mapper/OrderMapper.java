@@ -4,10 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
-import org.weebook.api.dto.OrderDTO;
-import org.weebook.api.dto.OrderFeedBackDto;
-import org.weebook.api.dto.OrderItemDTO;
-import org.weebook.api.dto.OrderStatusDTO;
+import org.weebook.api.dto.*;
 import org.weebook.api.entity.*;
 import org.weebook.api.web.request.OrderFeedBackRequest;
 import org.weebook.api.web.request.OrderItemRequest;
@@ -36,6 +33,10 @@ public interface OrderMapper {
     OrderFeedBackDto entityOrderFeedBackToDto(OrderFeedback orderFeedback);
 
     @Mapping(target = "orderFeedbacks", source = "order.orderFeedbacks", qualifiedByName = "order-feedback")
+    OrderDetailDTO entityOrderDetailToDto(Order order);
+
+    List<OrderDetailDTO> entityOrderDetailToDtos(List<Order> order);
+
     OrderDTO entityOrderToDto(Order order);
 
     List<OrderDTO> entityOrderToDtos(List<Order> order);
@@ -56,6 +57,10 @@ public interface OrderMapper {
     @Mapping(target = "id", ignore = true)
     Transaction transaction(User user, Order order, String action, BigDecimal preTradeAmount, BigDecimal amount, BigDecimal postTradeAmount);
 
+
+    TransactionDto entityTransactionToDto(Transaction transaction);
+
+    List<TransactionDto> entityTransactionToDtos(List<Transaction> transaction);
 
     @Named("order-feedback")
     default OrderFeedBackDto orderFeedback(List<OrderFeedback> orderFeedbacks) {

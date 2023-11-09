@@ -3,9 +3,11 @@ package org.weebook.api.repository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.weebook.api.entity.Order;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
@@ -30,5 +32,14 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             FROM Order o WHERE o.status = 'success'
             """)
     List<String> findAllMonthYear();
+
+
+    @Modifying
+    @Query("""
+        update User u
+        set u.balance = u.balance + :balance
+        where u.id = :id
+    """)
+    void updateBalanceUser(Long id, BigDecimal balance);
 
 }
