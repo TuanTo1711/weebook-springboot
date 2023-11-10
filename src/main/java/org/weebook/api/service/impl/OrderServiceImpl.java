@@ -2,6 +2,7 @@ package org.weebook.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,14 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.weebook.api.dto.OrderDTO;
-import org.weebook.api.dto.OrderFeedBackDto;
-import org.weebook.api.dto.TKProductDto;
-import org.weebook.api.dto.TkDto;
+import org.weebook.api.dto.*;
 import org.weebook.api.dto.mapper.NotificationMapper;
 import org.weebook.api.dto.mapper.OrderMapper;
+import org.weebook.api.dto.mapper.ProductMapper;
 import org.weebook.api.entity.*;
 import org.weebook.api.exception.StringException;
+import org.weebook.api.projection.OrderStatusProjection;
 import org.weebook.api.repository.*;
 import org.weebook.api.service.OrderService;
 import org.weebook.api.web.request.*;
@@ -41,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final TransactionRepository transactionRepository;
     private final OrderFeedBackRepository orderFeedBackRepository;
+    private final ProductMapper productMapper;
 
     private final SecurityContextHolderStrategy securityContextHolder
             = SecurityContextHolder.getContextHolderStrategy();
@@ -48,7 +49,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public OrderDTO sendOrder(OrderRequest orderRequest) {
+    public OrderDetailDTO sendOrder(OrderRequest orderRequest) {
         Order order = orderMapper.requestOrderToEntity(orderRequest, "Ordering");
 
         Authentication currentUser = this.securityContextHolder.getContext().getAuthentication();
@@ -59,8 +60,10 @@ public class OrderServiceImpl implements OrderService {
         String userName = currentUser.getName();
         User user = (User) userDetailsService.loadUserByUsername(userName);
         order.setUser(user);
-
-        order.setTotalDiscount(BigDecimal.ZERO);
+        if(user.getBalance().compareTo(orderRequest.getDiscountBalance()) < 0){
+            throw new StringException("Bạn không đủ điểm để sử dụng");
+        }
+        order.setDiscountVoucher(BigDecimal.ZERO);
 
         if (!StringUtils.hasText(orderRequest.getCode())) {
             String code = orderRequest.getCode();
@@ -72,21 +75,22 @@ public class OrderServiceImpl implements OrderService {
 
             first.ifPresent(voucher -> {
                 checkVoucher(voucher, orderRequest.getTotalAmount(), orderRequest.getCode());
-                order.setTotalDiscount(first.get().getDiscountAmount());
+                order.setDiscountVoucher(first.get().getDiscountAmount());
             });
         }
 
-        BigDecimal totalDiscount = order.getTotalDiscount().add(orderRequest.getDiscountBalance());
-        if (totalDiscount.compareTo(orderRequest.getTotalAmount()) > 0) {
-            order.setTotalDiscount(orderRequest.getTotalAmount());
-        }
-
-        OrderStatus orderStatus = orderMapper.buildOrderStatus("order");
+        OrderStatus orderStatus = orderMapper.buildOrderStatus("Ordering");
         order.getOrderStatuses().add(orderStatus);
         order.getOrderItems().forEach(item -> item.setOrder(order));
         orderStatus.setOrder(order);
 
         Order saved = orderRepository.saveAndFlush(order);
+
+        if(orderRequest.getDiscountBalance().compareTo(BigDecimal.ZERO) > 0){
+            Transaction transaction = transaction(saved, orderRequest.getDiscountBalance().negate());
+            transactionRepository.save(transaction);
+            orderRepository.updateBalanceUser(user.getId(), orderRequest.getDiscountBalance().negate());
+        }
 
         Notification notification = notificationMapper.notification(
                 "Thông báo về đơn hàng",
@@ -95,13 +99,13 @@ public class OrderServiceImpl implements OrderService {
                 "order",
                 user);
         notificationRepository.save(notification);
-        return orderMapper.entityOrderToDto(saved);
+        return orderMapper.entityOrderDetailToDto(saved);
     }
 
 
     @Transactional
     @Override
-    public OrderDTO updateStatus(UpdateStatusOrderRequest updateStatusOrderRequest) {
+    public OrderDetailDTO updateStatus(UpdateStatusOrderRequest updateStatusOrderRequest) {
         Optional<Order> orderOptional = orderRepository.findById(updateStatusOrderRequest.getIdOrder());
         if (orderOptional.isEmpty()) {
             throw new StringException("Không có order này.");
@@ -118,21 +122,30 @@ public class OrderServiceImpl implements OrderService {
         notificationRepository.save(notification);
 
         OrderStatus orderStatus = orderMapper.buildOrderStatus(updateStatusOrderRequest.getStatus());
+        orderStatus.setOrder(order);
         order.getOrderStatuses().add(orderStatus);
         orderStatus = orderStatusRepository.save(orderStatus);
         order.getOrderStatuses().add(orderStatus);
 
         if (updateStatusOrderRequest.getStatus().equals("success")) {
-            Transaction transaction = transaction(order);
+            BigDecimal amount = order.getTotalAmount().subtract(order.getDiscountVoucher()).subtract(order.getDiscountBalance());
+            BigDecimal total_amount = amount.multiply(BigDecimal.valueOf(0.1));
+            Transaction transaction = transaction(order, total_amount);
             transactionRepository.save(transaction);
+            orderRepository.updateBalanceUser(user.getId(), total_amount);
         }
 
         if (updateStatusOrderRequest.getStatus().equals("cancel")) {
             Set<OrderItem> orderItems = order.getOrderItems();
             cancel(orderItems);
+            if(order.getDiscountBalance().compareTo(BigDecimal.ZERO) > 0){
+                Transaction transaction = transaction(order, order.getDiscountBalance());
+                transactionRepository.save(transaction);
+                orderRepository.updateBalanceUser(user.getId(), order.getDiscountBalance());
+            }
         }
 
-        return orderMapper.entityOrderToDto(order);
+        return orderMapper.entityOrderDetailToDto(order);
     }
 
     @Override
@@ -158,14 +171,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> userFindByStatus(Long idUser, String status, Integer page) {
-        List<Order> orders = orderRepository.userFindByStatus(idUser, status, PageRequest.of(page - 1, 5));
-        return orderMapper.entityOrderToDtos(orders);
+    public List<OrderStatusProjection> userFindByStatus(FindOrderStatusRequest findOrderStatusRequest) {
+        Authentication currentUser = this.securityContextHolder.getContext().getAuthentication();
+        if (ObjectUtils.isEmpty(currentUser)) {
+            throw new AccessDeniedException("Can't order as no Authentication object found in context for current user.");
+        }
+
+        Pageable pageable = PageRequest.of(findOrderStatusRequest.getPagingRequest().getPageNumber() - 1,
+                findOrderStatusRequest.getPagingRequest().getPageSize());
+
+        String userName = currentUser.getName();
+        User user = (User) userDetailsService.loadUserByUsername(userName);
+        if(findOrderStatusRequest.getStatus().equals("All")){
+            return orderStatusRepository.userGetAllStatus(user.getId(), OrderStatusProjection.class, pageable);
+        }
+        return orderStatusRepository.userGetAllStatus(findOrderStatusRequest.getStatus(), user.getId(), OrderStatusProjection.class, pageable);
     }
 
     @Override
-    public List<OrderDTO> adminFindByStatus(String status, Integer page) {
-        List<Order> orders = orderRepository.adminFindByStatus(status, PageRequest.of(page - 1, 5));
+    public List<OrderDTO> adminFindByStatus(FindOrderStatusRequest findOrderStatusRequest) {
+        List<Order> orders = orderRepository.adminFindByStatus(findOrderStatusRequest.getStatus(), PageRequest.of(findOrderStatusRequest.getPagingRequest().getPageNumber()- 1, findOrderStatusRequest.getPagingRequest().getPageSize()));
         return orderMapper.entityOrderToDtos(orders);
     }
 
@@ -173,10 +198,11 @@ public class OrderServiceImpl implements OrderService {
     public TkDto tkByOrder(TkOrderRequest tkOrderRequest) {
         List<TKProductDto> tkProductDto;
         BigDecimal total;
+        Pageable pageable = PageRequest.of(tkOrderRequest.getPagingRequest().getPageNumber() - 1, tkOrderRequest.getPagingRequest().getPageSize());
         if (tkOrderRequest.getYearMonth().equals("All")) {
             tkProductDto = orderItemRepository.thongke(
                     "%" + tkOrderRequest.getNameProduct() + "%",
-                    PageRequest.of(tkOrderRequest.getPage() - 1, 8));
+                   pageable );
             total = orderItemRepository.thongketotal(
                     "%" + tkOrderRequest.getNameProduct() + "%");
         } else {
@@ -185,7 +211,7 @@ public class OrderServiceImpl implements OrderService {
                     Integer.valueOf(monthYear[1]),
                     Integer.valueOf(monthYear[0]),
                     "%" + tkOrderRequest.getNameProduct() + "%",
-                    PageRequest.of(tkOrderRequest.getPage() - 1, 8));
+                    pageable);
 
             total = orderItemRepository.thongketotal(Integer.valueOf(monthYear[1]), Integer.parseInt(monthYear[0]),
                     "%" + tkOrderRequest.getNameProduct() + "%");
@@ -205,7 +231,20 @@ public class OrderServiceImpl implements OrderService {
         return yearMonth;
     }
 
-    Transaction transaction(Order order) {
+    @Override
+    public OrderDetailDTO findById(Long id) {
+        Order order = orderRepository.findById(id).orElse(null);
+        return orderMapper.entityOrderDetailToDto(order);
+    }
+
+    @Override
+    public List<ProductInfo> trend(TrendProductRequest trendProductRequest) {
+        Pageable pageable = PageRequest.of(trendProductRequest.getPagingRequest().getPageNumber()-1, trendProductRequest.getPagingRequest().getPageSize());
+        List<Product> products = productRepository.trend(trendProductRequest.getDateMin(), trendProductRequest.getDateMax(), pageable);
+        return productMapper.toInfos(products);
+    }
+
+    Transaction transaction(Order order, BigDecimal amount) {
         User user = order.getUser();
         Transaction transactionOld = new Transaction();
         BigDecimal pre_trade_amount = BigDecimal.ZERO;
@@ -213,10 +252,7 @@ public class OrderServiceImpl implements OrderService {
             transactionOld = user.getTransactions().get(0);
             pre_trade_amount = transactionOld.getPostTradeAmount();
         }
-
-        BigDecimal amount = order.getTotalAmount().subtract(order.getTotalDiscount());
-        BigDecimal total_amount = amount.multiply(BigDecimal.valueOf(0.1));
-        BigDecimal post_trade_amount = pre_trade_amount.add(total_amount);
+        BigDecimal post_trade_amount = pre_trade_amount.add(amount);
         String action = "Order";
         return orderMapper.transaction(user, order, action, pre_trade_amount, amount, post_trade_amount);
     }

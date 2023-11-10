@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class OrderDTO {
+public class OrderDetailDTO {
     private Long id;
     private Instant orderDate;
     private BigDecimal totalAmount;
@@ -17,4 +17,7 @@ public class OrderDTO {
     private BigDecimal discountVoucher;
     private String deliveryAddress;
     private UserDto user;
+    private Set<OrderItemDTO> orderItems;
+    private Set<OrderStatusDTO> orderStatuses;
+    private OrderFeedBackDto orderFeedbacks;
 }

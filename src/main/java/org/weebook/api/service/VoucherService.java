@@ -1,7 +1,9 @@
 package org.weebook.api.service;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import org.weebook.api.dto.VoucherDTO;
 import org.weebook.api.web.request.AddVoucherVaoUserRequest;
+import org.weebook.api.web.request.PagingRequest;
 import org.weebook.api.web.request.VoucherRequest;
 
 import java.util.List;
@@ -11,9 +13,9 @@ public interface VoucherService {
 
     VoucherDTO create(AddVoucherVaoUserRequest addVoucherVaoUserRequest);
 
-    List<VoucherDTO> userGetAll(Long id);
+    List<VoucherDTO> userGetAll();
 
-    List<VoucherDTO> adminGetAll(Integer page);
+    List<VoucherDTO> adminGetAll(PagingRequest pagingRequest);
 
     String delete(String code);
 

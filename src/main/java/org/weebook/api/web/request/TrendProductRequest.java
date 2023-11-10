@@ -7,10 +7,10 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class TkOrderRequest {
-    String yearMonth;
+public class TrendProductRequest {
+    LocalDate dateMin;
 
-    String nameProduct = "";
+    LocalDate dateMax;
 
     PagingRequest pagingRequest;
 }

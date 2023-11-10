@@ -17,6 +17,8 @@ public interface ProductMapper {
     @Mapping(target = "totalReviews", expression = "java(product.getReviews().size())")
     ProductInfo toInfo(Product product);
 
+    List<ProductInfo> toInfos(List<Product> product);
+
     ProductDetail toDetail(Product product);
 
     @AfterMapping

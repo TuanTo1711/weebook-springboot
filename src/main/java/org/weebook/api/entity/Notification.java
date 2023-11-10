@@ -43,7 +43,7 @@ public class Notification implements Serializable {
     @Column(name = "type", length = Integer.MAX_VALUE)
     private String type;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

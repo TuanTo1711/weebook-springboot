@@ -5,14 +5,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
-import org.weebook.api.dto.OrderDTO;
-import org.weebook.api.dto.OrderFeedBackDto;
-import org.weebook.api.dto.TkDto;
+import org.weebook.api.dto.*;
+import org.weebook.api.projection.OrderStatusProjection;
 import org.weebook.api.service.OrderService;
-import org.weebook.api.web.request.OrderFeedBackRequest;
-import org.weebook.api.web.request.OrderRequest;
-import org.weebook.api.web.request.TkOrderRequest;
-import org.weebook.api.web.request.UpdateStatusOrderRequest;
+import org.weebook.api.web.request.*;
 
 import java.util.List;
 
@@ -24,12 +20,12 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public OrderDTO order(@Valid @RequestBody OrderRequest orderRequest) {
+    public OrderDetailDTO order(@Valid @RequestBody OrderRequest orderRequest) {
         return orderService.sendOrder(orderRequest);
     }
 
-    @PostMapping("/update/status")
-    public OrderDTO updateStatus(@RequestBody UpdateStatusOrderRequest updateStatusOrderRequest) {
+    @PostMapping("/update-status")
+    public OrderDetailDTO updateStatus(@RequestBody UpdateStatusOrderRequest updateStatusOrderRequest) {
         return orderService.updateStatus(updateStatusOrderRequest);
     }
 
@@ -38,17 +34,22 @@ public class OrderController {
         return orderService.orderFeedback(orderFeedBackRequest);
     }
 
-    @GetMapping("/user/find/status")
-    public List<OrderDTO> userFindByStatus(@RequestParam("idUser") Long idUser, @RequestParam("status") String status, @RequestParam("page") Integer page) {
-        return orderService.userFindByStatus(idUser, status, page);
+    @GetMapping("findBy")
+    public OrderDetailDTO orderDetailDTO(@Param("id") Long id){
+        return orderService.findById(id);
     }
 
-    @GetMapping("/admin/find/status")
-    public List<OrderDTO> userFindByStatus(@Param("status") String status, @Param("page") Integer page) {
-        return orderService.adminFindByStatus(status, page);
+    @PostMapping("/user-find-status")
+    public List<OrderStatusProjection> userFindByStatus(@RequestBody FindOrderStatusRequest status) {
+        return orderService.userFindByStatus(status);
     }
 
-    @PostMapping("/tk/by/order")
+    @GetMapping("/admin-find-status")
+    public List<OrderDTO> adminFindByStatus(@RequestBody FindOrderStatusRequest status) {
+        return orderService.adminFindByStatus(status);
+    }
+
+    @PostMapping("/tk-by-order")
     public TkDto tkByOrder(@RequestBody TkOrderRequest tkOrderRequest) {
         return orderService.tkByOrder(tkOrderRequest);
     }
@@ -56,5 +57,10 @@ public class OrderController {
     @GetMapping("get-by-year")
     public List<String> getYearMonth() {
         return orderService.getYearMonth();
+    }
+
+    @PostMapping("/trend")
+    public List<ProductInfo> getTrend(@RequestBody TrendProductRequest trendProductRequest){
+        return orderService.trend(trendProductRequest);
     }
 }
