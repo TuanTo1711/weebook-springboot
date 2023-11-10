@@ -77,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
 
                 checkVoucher(voucher, orderRequest.getTotalAmount(), orderRequest.getCode());
                 BigDecimal voucher_discount = first.get().getDiscountAmount();
-                if(voucher_discount.compareTo(BigDecimal.valueOf(100.0)) <= 0){
+                if(first.get().getType().equals("%")){
                     BigDecimal percent = voucher_discount.divide(BigDecimal.valueOf(100.0));
                     order.setDiscountVoucher(orderRequest.getTotalAmount().multiply(percent));
                 }else {

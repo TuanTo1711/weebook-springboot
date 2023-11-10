@@ -17,6 +17,12 @@ public class VoucherRequest {
     private String description;
 
 
+    //giảm % thì ghi %
+    //giam tiền thì ghi money
+    @NotBlank(message = "Type not blank")
+    private String type;
+
+
     @NotNull(message = "ValidTo not null")
     @FutureOrPresent(message = "The expiration date must be a future date")
     private LocalDateTime validTo;

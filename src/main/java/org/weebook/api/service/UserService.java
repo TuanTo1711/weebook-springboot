@@ -13,13 +13,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.weebook.api.dto.NotificationDto;
 import org.weebook.api.dto.TransactionDto;
+import org.weebook.api.dto.UserDto;
 import org.weebook.api.dto.mapper.NotificationMapper;
 import org.weebook.api.dto.mapper.OrderMapper;
+import org.weebook.api.dto.mapper.UserMapper;
 import org.weebook.api.entity.Notification;
 import org.weebook.api.entity.Transaction;
 import org.weebook.api.entity.User;
 import org.weebook.api.repository.NotificationRepository;
 import org.weebook.api.repository.UserRepository;
+import org.weebook.api.web.request.DogRequest;
 import org.weebook.api.web.request.PagingRequest;
 
 import java.util.List;
@@ -33,6 +36,7 @@ public class UserService {
     final OrderMapper orderMapper;
     final NotificationMapper notificationMapper;
     final NotificationRepository notificationRepository;
+    final UserMapper userMapper;
 
     private final SecurityContextHolderStrategy securityContextHolder
             = SecurityContextHolder.getContextHolderStrategy();
@@ -82,5 +86,11 @@ public class UserService {
         Notification notification = optionalNotification.get();
         notification.setIsRead(true);
         notificationRepository.save(notification);
+    }
+
+    public List<UserDto> getDog(DogRequest dogRequest){
+        Pageable pageable = PageRequest.of(dogRequest.getPagingRequest().getPageNumber(), dogRequest.getPagingRequest().getPageSize());
+        List<User> users = userRepository.get강아지(dogRequest.getDateMin(), dogRequest.getDateMax(), dogRequest.getMax(), pageable);
+        return userMapper.toDtos(users);
     }
 }

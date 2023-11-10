@@ -37,6 +37,8 @@ public class Voucher implements Serializable {
     @Column(name = "condition")
     private BigDecimal condition;
 
+    private String type;
+
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;
 

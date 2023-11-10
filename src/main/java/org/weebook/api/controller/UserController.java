@@ -12,6 +12,7 @@ import org.weebook.api.dto.UserDto;
 import org.weebook.api.dto.mapper.UserMapper;
 import org.weebook.api.entity.User;
 import org.weebook.api.service.UserService;
+import org.weebook.api.web.request.DogRequest;
 import org.weebook.api.web.request.PagingRequest;
 
 import java.util.List;
@@ -52,4 +53,11 @@ public class UserController {
     public void updateNotification(@PathVariable("idNotification") Long idNotification){
         userService.updateNotification(idNotification);
     }
+
+    @PostMapping("/dog")
+    public List<UserDto> dog(@RequestBody DogRequest dogRequest){
+        return userService.getDog(dogRequest);
+    }
+
+
 }
