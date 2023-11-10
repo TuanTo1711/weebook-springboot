@@ -2,6 +2,7 @@ package org.weebook.api.dto.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.weebook.api.dto.NotificationDto;
 import org.weebook.api.entity.Notification;
 import org.weebook.api.entity.User;
 
@@ -18,5 +19,9 @@ public interface NotificationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", source = "user")
     Notification notification(String title, String message, String type, User user);
+
+    NotificationDto entityToDto(Notification notification);
+
+    List<NotificationDto> entityToDtos(List<Notification> notification);
 
 }
