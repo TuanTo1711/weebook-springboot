@@ -129,7 +129,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList(role.getPermissions());
+        return AuthorityUtils.createAuthorityList(role.getName());
     }
 
     @Override
