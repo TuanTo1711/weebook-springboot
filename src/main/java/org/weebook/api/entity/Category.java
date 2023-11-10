@@ -35,10 +35,15 @@ public class Category implements Serializable {
     @JoinColumn(name = "parent_category_id")
     private Category parent;
 
+
     @OneToMany(mappedBy = "parent")
     @ToString.Exclude
     @Builder.Default
     private List<Category> children = new LinkedList<>();
+
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Product> products = new LinkedList<>();
 
     @Override
     public final boolean equals(Object o) {

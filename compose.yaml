@@ -1,19 +1,11 @@
-<<<<<<< HEAD
 version: '3.8'
-=======
->>>>>>> 855e50847766bad6e07ad9bf842a92576097cabe
 services:
-  postgres:
-    image: 'postgres:latest'
-    environment:
-<<<<<<< HEAD
-      - 'POSTGRES_DB=books'
-      - 'POSTGRES_PASSWORD=123'
-      - 'POSTGRES_USER=khoi'
-=======
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=root'
-      - 'POSTGRES_USER=root'
->>>>>>> 855e50847766bad6e07ad9bf842a92576097cabe
-    ports:
-      - '5432:5432'
+ postgres:
+  image: 'postgres:latest'
+  environment:
+    - POSTGRES_DB=books
+    - POSTGRES_PASSWORD=123
+    - POSTGRES_USER=khoi
+    - TZ=Asia/Ho_Chi_Minh
+  ports:
+    - '5432:5432'

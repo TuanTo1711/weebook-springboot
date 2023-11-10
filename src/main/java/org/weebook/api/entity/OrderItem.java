@@ -7,6 +7,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Builder
@@ -62,4 +63,26 @@ public class OrderItem implements Serializable {
                 ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : getClass().hashCode();
     }
+
+    public static void main(String[] args) {
+
+        int[] arr = new int[]{};
+        arr = null;
+        int[] arr2 = new int[]{1,2,4};
+
+        int[]arr3 = new int [arr.length + arr2.length];
+
+        int   equals = Arrays.compare(arr,arr2);
+        System.out.println(equals);
+
+
+
+        }
+
+
+
+
+
+
+
 }

@@ -7,22 +7,19 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.weebook.api.entity.Category;
 import org.weebook.api.entity.Genre;
 import org.weebook.api.entity.Product;
 
 import java.util.List;
 
-public interface ProductRepository extends JpaRepository<Product ,Long> , JpaSpecificationExecutor<Product> {
-
-    @Query("SELECT p FROM Product p WHERE p.category.id IN :array")
-    Page<Product> findProductsByCategoryIds(@Param("array") List<Long> array,
-                                            Pageable pageable);
+public interface genres extends JpaRepository<Genre,Long>, JpaSpecificationExecutor<Genre> {
+    Page<Genre> findAll(Specification specification, Pageable pageable);
 
     @Query("""
-        select p.genres from Product p
+        select g from Genre g join g.products p
+        where p.category.id in :objects
+        group by g
     """)
-    List<Genre> test(List<Object>  objects);
+    List<Genre> listGenresByCategoryName(List<Object>  objects);
 
 }

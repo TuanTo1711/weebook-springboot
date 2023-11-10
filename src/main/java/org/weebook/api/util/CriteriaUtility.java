@@ -1,5 +1,6 @@
 package org.weebook.api.util;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import org.springframework.data.domain.Range;
@@ -262,6 +263,19 @@ public class CriteriaUtility {
         return Sort.by(field);
     }
 
+    public static <T> Specification<T> buildFieldIn(String field, List<Object> values) {
+        return (root, query, criteriaBuilder) -> {
+            if (values == null || values.isEmpty()) {
+                return null;
+            }
+            Path<?> path = getPath(field, root);
+            CriteriaBuilder.In<Object> inClause = criteriaBuilder.in(path);
+            values.forEach(inClause::value);
+            return inClause;
+        };
+    }
+
+
     public static <T> Specification<T> toSpecification(FilterRequest filterRequest) {
         String type = filterRequest.getType();
 
@@ -289,6 +303,9 @@ public class CriteriaUtility {
             }
             case GE -> {
                 return buildFieldGE(filterRequest.getField(), NumberUtils.parseNumber(filterRequest.getValue(), Integer.class));
+            }
+            case IN -> {
+                return buildFieldIn(filterRequest.getField(), filterRequest.getValues());
             }
             default -> throw new IllegalArgumentException("Criteria Type: '%s' is not supported".formatted(type));
         }
@@ -353,6 +370,9 @@ public class CriteriaUtility {
         GE, // Greater Than or Equal
         LIKE, // Like (for text search)
         LIKE_ANY,
-        UID, BETWEEN
+        UID, BETWEEN,
+        IN
+
+
     }
 }

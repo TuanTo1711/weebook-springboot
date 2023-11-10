@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.weebook.api.dto.ProductDto;
 import org.weebook.api.dto.mapper.ProductMapper;
 import org.weebook.api.entity.Category;
@@ -17,6 +18,10 @@ import org.weebook.api.util.CriteriaUtility;
 import org.weebook.api.web.request.FilterRequest;
 import org.weebook.api.web.request.PagingRequest;
 
+import java.io.*;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -53,15 +58,39 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> saveListProduct(List<ProductDto> booksDTO) {
-        List<Product> productList = productMapper.ListToEntity(booksDTO);
-        return productMapper.ListToDto(productRepository.saveAll(productList));
+    public List<ProductDto> saveListProduct(MultipartFile file) throws IOException {
+        List<ProductDto> productDto = readProductsFromCSV(file.getInputStream());
+        List<Product> products =  productRepository.saveAll(productMapper.ListToEntity(productDto));
+        return productMapper.ListToDto(products);
     }
 
+    private static List<ProductDto> readProductsFromCSV(InputStream inputStream) {
+        List<ProductDto> products = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            boolean headerSkipped = false;
+            while ((line = br.readLine()) != null) {
+                if (!headerSkipped) {
+                    headerSkipped = true;
+                    continue;
+                }
+                String[] values = line.split(",");
+                ProductDto product = new ProductDto();
+                product.setValuesFromArray(values);
+                products.add(product);
+            }
+            System.out.println(products);
+            return products;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
     @Override
     public PageImpl<ProductDto> filterProducts(Long id, PagingRequest pagingRequest) {
-        FilterRequest filterRequest = new FilterRequest("category.id",id.toString(),"EQ");
+        FilterRequest filterRequest = new FilterRequest("category.id", id.toString(), "EQ");
         pagingRequest.getFilters().add(filterRequest);
         Specification<Product> specification = CriteriaUtility.getSpecification(pagingRequest.getFilters());
         Page<Product> products = productRepository.findAll(specification, buildPageable(pagingRequest));
