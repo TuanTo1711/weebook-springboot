@@ -5,7 +5,7 @@ services:
     environment:
       - 'TZ=Asia/Ho_Chi_Minh'
       - 'POSTGRES_DB=db-schema'
-      - 'POSTGRES_PASSWORD=db-user'
-      - 'POSTGRES_USER=db-password'
+      - 'POSTGRES_PASSWORD=db-password'
+      - 'POSTGRES_USER=db-user'
     ports:
       - '5432:5432'

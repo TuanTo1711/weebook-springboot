@@ -42,4 +42,19 @@ public class DefaultAppRole {
             Set.of("answer_tickets",
                     "resolve_issues")
     );
+
+    public static final RoleDto getRoleConfigByUserType(String userType){
+        switch (userType){
+            case "admin":
+                return ADMIN_ROLE_CONFIG;
+            case "staff":
+                return STAFF_ROLE_CONFIG;
+            case "moderator":
+                return MODERATOR_ROLE_CONFIG;
+            case "support":
+                return SUPPORT_ROLE_CONFIG;
+            default:
+                return DEFAULT_ROLE_CONFIG;
+        }
+    }
 }

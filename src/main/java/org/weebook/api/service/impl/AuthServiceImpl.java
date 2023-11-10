@@ -31,7 +31,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final OTPService otpService;
     private final JwtUtils jwtUtils;
-    private final UserRepository userRepository;
 
     @Override
     public JwtResponse login(SignInRequest signInRequest) {
@@ -57,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UpdateProfileResponse updateProfile(UserDto userDto) {
-        User entity = userRepository.findByUsername(userDto.username()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User entity = (User) userDetailsService.loadUserByUsername(userDto.username());
         UserDto userDtoOld = userMapper.toDto(entity);
         userMapper.partialUpdate(userDto, entity);
         userDetailsService.updateUser(entity);

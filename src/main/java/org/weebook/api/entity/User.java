@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
+import org.weebook.api.dto.RoleDto;
 
 import java.io.Serial;
 import java.math.BigDecimal;
@@ -128,7 +129,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList(role.getPermissions());
+        return AuthorityUtils.createAuthorityList(role.getName());
     }
 
     @Override

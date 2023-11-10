@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "api/v1/auth/**").hasAuthority("read")
+                        .requestMatchers(HttpMethod.POST, "api/v2/admin").hasAuthority("admin")
                         .requestMatchers(HttpMethod.GET, "/api/v1/category/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/otp/**").permitAll()
@@ -62,6 +63,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         ));
         return httpSecurity.build();
     }
