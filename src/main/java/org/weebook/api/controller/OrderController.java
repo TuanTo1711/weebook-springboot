@@ -10,6 +10,7 @@ import org.weebook.api.projection.OrderStatusProjection;
 import org.weebook.api.service.OrderService;
 import org.weebook.api.web.request.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -39,19 +40,19 @@ public class OrderController {
         return orderService.findById(id);
     }
 
-    @PostMapping("/user-find-status")
-    public List<OrderStatusProjection> userFindByStatus(@RequestBody FindOrderStatusRequest status) {
-        return orderService.userFindByStatus(status);
+    @GetMapping("/user-find-status")
+    public List<OrderStatusProjection> userFindByStatus(String status, @ModelAttribute PagingRequest pagingRequest) {
+        return orderService.userFindByStatus(status, pagingRequest);
     }
 
     @GetMapping("/admin-find-status")
-    public List<OrderDTO> adminFindByStatus(@RequestBody FindOrderStatusRequest status) {
-        return orderService.adminFindByStatus(status);
+    public List<OrderDTO> adminFindByStatus(String status, @ModelAttribute PagingRequest pagingRequest) {
+        return orderService.adminFindByStatus(status, pagingRequest);
     }
 
-    @PostMapping("/tk-by-order")
-    public TkDto tkByOrder(@RequestBody TkOrderRequest tkOrderRequest) {
-        return orderService.tkByOrder(tkOrderRequest);
+    @GetMapping("/tk-by-order")
+    public TkDto tkByOrder(String yearMonth, String nameProduct, PagingRequest pagingRequest) {
+        return orderService.tkByOrder(yearMonth, nameProduct, pagingRequest);
     }
 
     @GetMapping("get-by-year")
@@ -59,8 +60,13 @@ public class OrderController {
         return orderService.getYearMonth();
     }
 
-    @PostMapping("/trend")
-    public List<ProductInfo> getTrend(@RequestBody TrendProductRequest trendProductRequest){
-        return orderService.trend(trendProductRequest);
+    @GetMapping("/trend")
+    public List<ProductInfo> getTrend(LocalDate dateMin, LocalDate dateMax, PagingRequest pagingRequest){
+        return orderService.trend(dateMin,dateMax, pagingRequest);
+    }
+
+    @GetMapping("/add-order")
+    public void add(){
+        orderService.addOrder();
     }
 }

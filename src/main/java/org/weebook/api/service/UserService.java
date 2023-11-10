@@ -25,6 +25,7 @@ import org.weebook.api.repository.UserRepository;
 import org.weebook.api.web.request.DogRequest;
 import org.weebook.api.web.request.PagingRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,9 +89,20 @@ public class UserService {
         notificationRepository.save(notification);
     }
 
-    public List<UserDto> getDog(DogRequest dogRequest){
-        Pageable pageable = PageRequest.of(dogRequest.getPagingRequest().getPageNumber(), dogRequest.getPagingRequest().getPageSize());
-        List<User> users = userRepository.get강아지(dogRequest.getDateMin(), dogRequest.getDateMax(), dogRequest.getMax(), pageable);
+    public List<UserDto> getDog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest){
+        Pageable pageable = PageRequest.of(pagingRequest.getPageNumber()-1, pagingRequest.getPageSize());
+        List<User> users = userRepository.get강아지(dateMin, dateMax, max, pageable);
+        System.out.println(users.size());
         return userMapper.toDtos(users);
+    }
+
+    public void insertUser(){
+        for (int i=0; i< 1000000; i++){
+            User user = User
+                    .builder()
+                    .username("cuongg" + i)
+                    .build();
+            userRepository.save(user);
+        }
     }
 }

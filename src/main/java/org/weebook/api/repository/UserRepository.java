@@ -43,15 +43,44 @@ public interface UserRepository extends JpaSpecificationExecutor<User>, JpaRepos
     """)
     Long getAllNotificationTotal(Long id);
 
-    @Query("""
-        select u from User u join u.orders o
-        where o.status = 'cancel' and u.deletedDate != null
-            and CAST(o.orderDate AS localdate) >= :dateMin
-            and CAST(o.orderDate AS localdate) <= :dateMax
-            and count(u) > :max
-        group by u
-        order by count(u) desc
-    """)
-    List<User> get강아지(LocalDate dateMin, LocalDate dateMax, Integer max, Pageable pageable);
+//    @Query("""
+//    SELECT u FROM User u
+//               WHERE u.deletedDate IS NULL AND
+//               (
+//                   (SELECT COALESCE(COUNT(o.user), 0) FROM Order o
+//                   WHERE o.status = 'bom'
+//                   AND CAST(o.orderDate AS localdate) BETWEEN :dateMin AND :dateMax
+//                   AND o.user = u
+//                   GROUP BY o.user) >
+//                   ((SELECT COALESCE(COUNT(o.user), 0) FROM Order o
+//                   WHERE o.status = 'success'
+//                   AND CAST(o.orderDate AS localdate) BETWEEN :dateMin AND :dateMax
+//                   AND o.user = u
+//                   GROUP BY o.user) + :maxBom)
+//               )
+//""")
+//    List<User> get강아지(LocalDate dateMin, LocalDate dateMax, Integer maxBom, Pageable pageable);
 
+    @Query("""
+        SELECT u FROM User u join u.orders o
+        WHERE u.deletedDate IS NULL
+            AND CAST(o.orderDate AS localdate) BETWEEN :dateMin AND :dateMax
+        group by u
+        HAVING SUM(CASE WHEN o.status = 'bom' THEN 1 ELSE 0 END) >
+        (SUM(CASE WHEN o.status = 'success' THEN 1 ELSE 0 END) + :maxBom)
+        
+""")
+    List<User> get강아지(LocalDate dateMin, LocalDate dateMax, Integer maxBom, Pageable pageable);
+
+
+//    @Query("""
+//        select u from User u join u.orders o
+//        where o.status = 'cancel' and u.deletedDate != null
+//            and CAST(o.orderDate AS localdate) >= :dateMin
+//            and CAST(o.orderDate AS localdate) <= :dateMax
+//            and sum(o.)
+//        group by u
+//        order by count(u) desc
+//    """)
+//    List<User> topOrder(LocalDate dateMin, LocalDate dateMax, Integer max, Pageable pageable);
 }

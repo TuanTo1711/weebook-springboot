@@ -24,7 +24,7 @@ public class VoucherController {
         return voucherService.create(voucherRequest);
     }
 
-    @PostMapping("add/create")
+    @PostMapping("add-create")
     VoucherDTO create(@RequestBody AddVoucherVaoUserRequest addVoucherVaoUserRequest){
         return voucherService.create(addVoucherVaoUserRequest);
     }
@@ -34,17 +34,17 @@ public class VoucherController {
         return voucherService.findByCode(code);
     }
 
-    @GetMapping("/user/get/all")
+    @GetMapping("/user-get-all")
     List<VoucherDTO> userGetAll(){
         return voucherService.userGetAll();
     }
 
-    @GetMapping("/admin/get/all")
-    List<VoucherDTO> adminGetAll(@RequestBody PagingRequest pagingRequest){
+    @GetMapping("/admin-get-all")
+    List<VoucherDTO> adminGetAll(@ModelAttribute PagingRequest pagingRequest){
         return voucherService.adminGetAll(pagingRequest);
     }
 
-    @DeleteMapping("/delete/{code}")
+    @DeleteMapping("/delete-{code}")
     String delete(@PathVariable("code") String code){
         return voucherService.delete(code);
     }

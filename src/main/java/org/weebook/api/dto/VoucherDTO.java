@@ -24,4 +24,6 @@ public class VoucherDTO implements Serializable {
 
     String description;
 
+    String type;
+
 }

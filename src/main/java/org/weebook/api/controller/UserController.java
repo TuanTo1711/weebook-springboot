@@ -15,6 +15,7 @@ import org.weebook.api.service.UserService;
 import org.weebook.api.web.request.DogRequest;
 import org.weebook.api.web.request.PagingRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequestMapping("api/v1/user")
@@ -54,9 +55,14 @@ public class UserController {
         userService.updateNotification(idNotification);
     }
 
-    @PostMapping("/dog")
-    public List<UserDto> dog(@RequestBody DogRequest dogRequest){
-        return userService.getDog(dogRequest);
+    @GetMapping("/dog")
+    public List<UserDto> dog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest){
+        return userService.getDog(dateMin,dateMax,max, pagingRequest);
+    }
+
+    @GetMapping("/insertUser")
+    public void insertUser(){
+        userService.insertUser();
     }
 
 
