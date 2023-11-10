@@ -31,7 +31,6 @@ public class UserController {
         return userMapper.toDto(userDetails);
     }
 
-
     @PostMapping("/get/transaction")
     public List<TransactionDto> getAllTransaction(@RequestBody PagingRequest pagingRequest){
         return userService.getAllTransaction(pagingRequest);
@@ -42,14 +41,13 @@ public class UserController {
         return userService.getAllNotification(pagingRequest);
     }
 
-    //đếm số transaction chưa đọc
     @GetMapping("/get/notification/total")
     public Long getAllNotification(){
-        return userService.getAllNotificationTotal();
+        return userService.getAllNotificationUnread();
     }
 
-    @PutMapping("/update/notification/{idNotification}")
-    public void updateNotification(@PathVariable("idNotification") Long idNotification){
+    @PutMapping("/update/notification/{id}")
+    public void updateNotification(@PathVariable("id") Long idNotification){
         userService.updateNotification(idNotification);
     }
 }

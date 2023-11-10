@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.weebook.api.entity.Notification;
 import org.weebook.api.entity.Transaction;
@@ -21,24 +20,23 @@ public interface UserRepository extends JpaSpecificationExecutor<User>, JpaRepos
 
     void deleteByUsername(String username);
 
-
     @Query("""
-        select t from Transaction t
-        where t.user.id = :id
-    """)
+                select t from Transaction t
+                where t.user.id = :id
+            """)
     Page<Transaction> getAllTransaction(Long id, Pageable pageable);
 
     @Query("""
-        select n from Notification n
-        where n.user.id = :id
-    """)
+                select n from Notification n
+                where n.user.id = :id
+            """)
     Page<Notification> getAllNotification(Long id, Pageable pageable);
 
     @Query("""
-        select count(n.user) from Notification n
-        where n.user.id = :id and n.isRead = false
-        group by n.user
-    """)
+                select count(n.user) from Notification n
+                where n.user.id = :id and n.isRead = false
+                group by n.user
+            """)
     Long getAllNotificationTotal(Long id);
 
 }
