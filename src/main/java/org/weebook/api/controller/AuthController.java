@@ -52,7 +52,7 @@ public class AuthController {
                 .build();
     }
 
-    @PatchMapping("/recovery-password")
+    @PatchMapping("/otp/recovery-password")
     public ResultResponse<Void> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         authService.changePassword(changePasswordRequest);
         return ResultResponse.<Void>builder()
@@ -61,7 +61,7 @@ public class AuthController {
                 .data(null)
                 .build();
     }
-
+    
     @PostMapping("/verify-otp")
     public ResultResponse<Void> verifyOTP(@RequestBody VerifyEmail body) {
         authService.verifyOtp(body.email(), body.code());
