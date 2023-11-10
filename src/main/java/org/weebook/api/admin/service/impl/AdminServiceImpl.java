@@ -1,7 +1,6 @@
 package org.weebook.api.admin.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
@@ -14,6 +13,9 @@ import org.weebook.api.admin.web.response.AdminUpdateStaffResponse;
 import org.weebook.api.config.DefaultAppRole;
 import org.weebook.api.dto.RoleDto;
 import org.weebook.api.entity.User;
+import org.weebook.api.repository.UserRepository;
+
+import java.util.List;
 
 
 @Service
@@ -22,6 +24,14 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsManager userDetailsService;
     private final AdminMapper adminMapper;
+    private final UserRepository userRepository;
+
+    @Override
+    public List<AdminDto> findAllStaff() {
+        List<User> ListStaff = userRepository.findAll();
+        return adminMapper.listToDto(ListStaff);
+    }
+
     @Override
     public AdminDto registerStaff(AdminManageRoleRequest adminDtoRequest) {
         RoleDto selectRole = DefaultAppRole.getRoleConfigByUserType(adminDtoRequest.getRoleDto());
@@ -45,5 +55,9 @@ public class AdminServiceImpl implements AdminService {
         return adminMapper.updateStaff(adminOld, adminMapper.toDto(updatedUser));
     }
 
-
+    @Override
+    public List<AdminDto> getUserByRole(List<String> role) {
+        List<User> userList = userRepository.findByRole_NameIn(role);
+        return adminMapper.listToDto(userList);
+    }
 }

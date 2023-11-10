@@ -22,6 +22,7 @@ import org.weebook.api.web.request.SignUpRequest;
 import org.weebook.api.web.response.JwtResponse;
 import org.weebook.api.web.response.UpdateProfileResponse;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -53,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
     public UserDto register(SignUpRequest signUpRequest) {
         RoleDto roledto = DefaultAppRole.DEFAULT_USER_ROLE;
         User user = userMapper.toEntity(signUpRequest, roledto);
+        user.setBalance(BigDecimal.ZERO);
         String otp = otpUtil.generateOTP();
         user.setOtpCode(otp);
         emailSender.sendOTPEmail(user.getEmail(), otp);

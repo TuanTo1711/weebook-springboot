@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/otp/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/otp/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v2/admin/**").hasAuthority("admin")
                         .requestMatchers(HttpMethod.POST, "/api/v2/admin/**").hasAuthority("admin")
                         .requestMatchers(HttpMethod.PUT, "/api/v2/admin/**").hasAuthority("admin")
                         .anyRequest().authenticated())

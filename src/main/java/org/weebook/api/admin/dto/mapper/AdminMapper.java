@@ -7,6 +7,8 @@ import org.weebook.api.admin.web.response.AdminUpdateStaffResponse;
 import org.weebook.api.dto.RoleDto;
 import org.weebook.api.entity.User;
 
+import java.util.List;
+
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface AdminMapper {
 
@@ -23,4 +25,6 @@ public interface AdminMapper {
     @Mapping(target = "old", source = "adminDto")
     @Mapping(target = "neq", source = "dto")
     AdminUpdateStaffResponse updateStaff(AdminDto adminDto, AdminDto dto);
+
+    List<AdminDto> listToDto (List<User> users);
 }
