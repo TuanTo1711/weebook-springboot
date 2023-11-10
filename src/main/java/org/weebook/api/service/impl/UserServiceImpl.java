@@ -10,12 +10,12 @@ import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.weebook.api.entity.User;
 import org.weebook.api.repository.UserRepository;
+import org.weebook.api.service.UserService;
 
 import static org.weebook.api.exception.error.ErrorMessages.ACCOUNT_NOT_FOUND_ERROR;
 
@@ -23,7 +23,7 @@ import static org.weebook.api.exception.error.ErrorMessages.ACCOUNT_NOT_FOUND_ER
 @RequiredArgsConstructor
 @Slf4j
 @Setter
-public class UserServiceImpl implements UserDetailsManager {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -31,16 +31,23 @@ public class UserServiceImpl implements UserDetailsManager {
             = SecurityContextHolder.getContextHolderStrategy();
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         Assert.notNull(username, "Username must be not null");
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(ACCOUNT_NOT_FOUND_ERROR));
     }
 
     @Override
+    public UserDetails loadUserByEmail(String email) {
+        Assert.notNull(email, "Email must be not null");
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(ACCOUNT_NOT_FOUND_ERROR));
+    }
+
+    @Override
     public void createUser(UserDetails userDetails) {
         String username = userDetails.getUsername();
-        Assert.isTrue(!this.userExists(username), "User with username: %s exists" .formatted(username));
+        Assert.isTrue(!this.userExists(username), "User with username: %s exists".formatted(username));
         User user = (User) userDetails;
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
@@ -69,7 +76,7 @@ public class UserServiceImpl implements UserDetailsManager {
             Assert.state(user != null, "Current user doesn't exist in database.");
             Assert.state(passwordEncoder.matches(oldPassword, user.getPassword()), "Old password don't match.");
             user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.saveAndFlush(user);
+            userRepository.save(user);
         }
     }
 

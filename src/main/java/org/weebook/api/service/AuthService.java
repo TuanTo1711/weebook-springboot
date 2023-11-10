@@ -17,5 +17,5 @@ public interface AuthService {
 
     void changePassword(ChangePasswordRequest changePasswordRequest);
 
-    Boolean verifyOtp(String email, String code);
+    void verifyOtp(String email, String code);
 }

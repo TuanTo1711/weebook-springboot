@@ -63,11 +63,11 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResultResponse<Boolean> verifyOTP(@RequestBody VerifyEmail body) {
-        return ResultResponse.<Boolean>builder()
+    public ResultResponse<Void> verifyOTP(@RequestBody VerifyEmail body) {
+        authService.verifyOtp(body.email(), body.code());
+        return ResultResponse.<Void>builder()
                 .status(200)
-                .message("OTP Verify")
-                .data(authService.verifyOtp(body.email(), body.code()))
+                .message("OTP Verified")
                 .build();
     }
 }

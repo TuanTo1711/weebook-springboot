@@ -299,10 +299,18 @@ public class CriteriaUtil {
                 return null;
             }
 
-            Path<BigDecimal> path = getPath(field, root);
-            return criteriaBuilder.between(path,
-                    range.getLowerBound().getValue().get(),
-                    range.getUpperBound().getValue().get());
+            var minValue = range.getLowerBound();
+            var maxValue = range.getUpperBound();
+
+            if (minValue.isBounded() || maxValue.isBounded()) {
+                Path<BigDecimal> path = getPath(field, root);
+                return criteriaBuilder.between(
+                        path,
+                        minValue.getValue().get(),
+                        maxValue.getValue().get());
+            }
+
+            return null;
         };
     }
 

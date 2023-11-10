@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.weebook.api.config.DefaultAppRole;
@@ -13,6 +12,7 @@ import org.weebook.api.dto.UserDto;
 import org.weebook.api.dto.mapper.UserMapper;
 import org.weebook.api.entity.User;
 import org.weebook.api.service.AuthService;
+import org.weebook.api.service.UserService;
 import org.weebook.api.util.EmailSender;
 import org.weebook.api.util.JwtUtil;
 import org.weebook.api.util.OTPUtil;
@@ -29,7 +29,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDetailsManager userDetailsService;
+    private final UserService userDetailsService;
     private final AuthenticationProvider daoAuthenticationProvider;
     private final UserMapper userMapper;
     private final EmailSender emailSender;
@@ -76,15 +76,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Boolean verifyOtp(String email, String code) {
-        User entity = (User) userDetailsService.loadUserByUsername(email);
+    public void verifyOtp(String email, String code) {
+        User entity = (User) userDetailsService.loadUserByEmail(email);
         String otpCode = entity.getOtpCode();
-
-        Assert.state(otpCode.equals(code), "Otp code don't match");
-
         Instant otpExpiryTime = entity.getOtpExpiryTime();
+        Assert.state(Objects.equals(otpCode, code), "Otp code doesn't match");
+        Assert.state(otpExpiryTime != null && otpExpiryTime.isAfter(Instant.now()), "Otp expired");
 
-        return Objects.nonNull(otpExpiryTime) && otpExpiryTime.isAfter(Instant.now());
+        entity.setOtpCode(null);
+        entity.setOtpExpiryTime(null);
+        userDetailsService.updateUser(entity);
     }
 
 }
