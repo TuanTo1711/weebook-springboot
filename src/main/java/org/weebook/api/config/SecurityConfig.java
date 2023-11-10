@@ -50,11 +50,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/verify-otp").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/category/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/user/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/otp/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/otp/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/otp/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v2/admin/**").hasAuthority("admin")
+                        .requestMatchers(HttpMethod.PUT, "/api/v2/admin/**").hasAuthority("admin")
                         .anyRequest().authenticated())
                 .sessionManagement(sessionManager -> sessionManager
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
