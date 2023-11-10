@@ -34,12 +34,12 @@ public class VoucherController {
         return voucherService.findByCode(code);
     }
 
-    @PostMapping("/user/get/all")
+    @GetMapping("/user/get/all")
     List<VoucherDTO> userGetAll(){
         return voucherService.userGetAll();
     }
 
-    @PostMapping("/admin/get/all")
+    @GetMapping("/admin/get/all")
     List<VoucherDTO> adminGetAll(@RequestBody PagingRequest pagingRequest){
         return voucherService.adminGetAll(pagingRequest);
     }
