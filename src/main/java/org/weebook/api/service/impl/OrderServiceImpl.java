@@ -2,6 +2,7 @@ package org.weebook.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,8 +15,10 @@ import org.springframework.util.StringUtils;
 import org.weebook.api.dto.*;
 import org.weebook.api.dto.mapper.NotificationMapper;
 import org.weebook.api.dto.mapper.OrderMapper;
+import org.weebook.api.dto.mapper.ProductMapper;
 import org.weebook.api.entity.*;
 import org.weebook.api.exception.StringException;
+import org.weebook.api.projection.OrderStatusProjection;
 import org.weebook.api.repository.*;
 import org.weebook.api.service.OrderService;
 import org.weebook.api.web.request.*;
@@ -38,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final TransactionRepository transactionRepository;
     private final OrderFeedBackRepository orderFeedBackRepository;
+    private final ProductMapper productMapper;
 
     private final SecurityContextHolderStrategy securityContextHolder
             = SecurityContextHolder.getContextHolderStrategy();
@@ -75,7 +79,7 @@ public class OrderServiceImpl implements OrderService {
             });
         }
 
-        OrderStatus orderStatus = orderMapper.buildOrderStatus("order");
+        OrderStatus orderStatus = orderMapper.buildOrderStatus("Ordering");
         order.getOrderStatuses().add(orderStatus);
         order.getOrderItems().forEach(item -> item.setOrder(order));
         orderStatus.setOrder(order);
@@ -118,6 +122,7 @@ public class OrderServiceImpl implements OrderService {
         notificationRepository.save(notification);
 
         OrderStatus orderStatus = orderMapper.buildOrderStatus(updateStatusOrderRequest.getStatus());
+        orderStatus.setOrder(order);
         order.getOrderStatuses().add(orderStatus);
         orderStatus = orderStatusRepository.save(orderStatus);
         order.getOrderStatuses().add(orderStatus);
@@ -166,17 +171,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> userFindByStatus(FindOrderStatusRequest findOrderStatusRequest) {
+    public List<OrderStatusProjection> userFindByStatus(FindOrderStatusRequest findOrderStatusRequest) {
         Authentication currentUser = this.securityContextHolder.getContext().getAuthentication();
         if (ObjectUtils.isEmpty(currentUser)) {
             throw new AccessDeniedException("Can't order as no Authentication object found in context for current user.");
         }
 
+        Pageable pageable = PageRequest.of(findOrderStatusRequest.getPagingRequest().getPageNumber() - 1,
+                findOrderStatusRequest.getPagingRequest().getPageSize());
+
         String userName = currentUser.getName();
         User user = (User) userDetailsService.loadUserByUsername(userName);
-        List<Order> orders = orderRepository
-                    .userFindByStatus(user.getId(), findOrderStatusRequest.getStatus(), PageRequest.of(findOrderStatusRequest.getPagingRequest().getPageNumber() - 1, findOrderStatusRequest.getPagingRequest().getPageSize()));
-        return orderMapper.entityOrderToDtos(orders);
+        if(findOrderStatusRequest.getStatus().equals("All")){
+            return orderStatusRepository.userGetAllStatus(user.getId(), OrderStatusProjection.class, pageable);
+        }
+        return orderStatusRepository.userGetAllStatus(findOrderStatusRequest.getStatus(), user.getId(), OrderStatusProjection.class, pageable);
     }
 
     @Override
@@ -189,10 +198,11 @@ public class OrderServiceImpl implements OrderService {
     public TkDto tkByOrder(TkOrderRequest tkOrderRequest) {
         List<TKProductDto> tkProductDto;
         BigDecimal total;
+        Pageable pageable = PageRequest.of(tkOrderRequest.getPagingRequest().getPageNumber() - 1, tkOrderRequest.getPagingRequest().getPageSize());
         if (tkOrderRequest.getYearMonth().equals("All")) {
             tkProductDto = orderItemRepository.thongke(
                     "%" + tkOrderRequest.getNameProduct() + "%",
-                    PageRequest.of(tkOrderRequest.getPage() - 1, 8));
+                   pageable );
             total = orderItemRepository.thongketotal(
                     "%" + tkOrderRequest.getNameProduct() + "%");
         } else {
@@ -201,7 +211,7 @@ public class OrderServiceImpl implements OrderService {
                     Integer.valueOf(monthYear[1]),
                     Integer.valueOf(monthYear[0]),
                     "%" + tkOrderRequest.getNameProduct() + "%",
-                    PageRequest.of(tkOrderRequest.getPage() - 1, 8));
+                    pageable);
 
             total = orderItemRepository.thongketotal(Integer.valueOf(monthYear[1]), Integer.parseInt(monthYear[0]),
                     "%" + tkOrderRequest.getNameProduct() + "%");
@@ -225,6 +235,13 @@ public class OrderServiceImpl implements OrderService {
     public OrderDetailDTO findById(Long id) {
         Order order = orderRepository.findById(id).orElse(null);
         return orderMapper.entityOrderDetailToDto(order);
+    }
+
+    @Override
+    public List<ProductInfo> trend(TrendProductRequest trendProductRequest) {
+        Pageable pageable = PageRequest.of(trendProductRequest.getPagingRequest().getPageNumber()-1, trendProductRequest.getPagingRequest().getPageSize());
+        List<Product> products = productRepository.trend(trendProductRequest.getDateMin(), trendProductRequest.getDateMax(), pageable);
+        return productMapper.toInfos(products);
     }
 
     Transaction transaction(Order order, BigDecimal amount) {

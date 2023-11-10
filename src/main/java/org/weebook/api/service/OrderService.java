@@ -1,9 +1,7 @@
 package org.weebook.api.service;
 
-import org.weebook.api.dto.OrderDTO;
-import org.weebook.api.dto.OrderDetailDTO;
-import org.weebook.api.dto.OrderFeedBackDto;
-import org.weebook.api.dto.TkDto;
+import org.weebook.api.dto.*;
+import org.weebook.api.projection.OrderStatusProjection;
 import org.weebook.api.web.request.*;
 
 import java.util.List;
@@ -15,7 +13,7 @@ public interface OrderService {
 
     OrderFeedBackDto orderFeedback(OrderFeedBackRequest orderFeedBackRequest);
 
-    List<OrderDTO> userFindByStatus(FindOrderStatusRequest findOrderStatusRequest);
+    List<OrderStatusProjection> userFindByStatus(FindOrderStatusRequest findOrderStatusRequest);
 
     List<OrderDTO> adminFindByStatus(FindOrderStatusRequest findOrderStatusRequest);
 
@@ -24,4 +22,6 @@ public interface OrderService {
     List<String> getYearMonth();
 
     OrderDetailDTO findById(Long id);
+
+    List<ProductInfo> trend(TrendProductRequest trendProductRequest);
 }

@@ -5,10 +5,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
-import org.weebook.api.dto.OrderDTO;
-import org.weebook.api.dto.OrderDetailDTO;
-import org.weebook.api.dto.OrderFeedBackDto;
-import org.weebook.api.dto.TkDto;
+import org.weebook.api.dto.*;
+import org.weebook.api.projection.OrderStatusProjection;
 import org.weebook.api.service.OrderService;
 import org.weebook.api.web.request.*;
 
@@ -26,7 +24,7 @@ public class OrderController {
         return orderService.sendOrder(orderRequest);
     }
 
-    @PostMapping("/update/status")
+    @PostMapping("/update-status")
     public OrderDetailDTO updateStatus(@RequestBody UpdateStatusOrderRequest updateStatusOrderRequest) {
         return orderService.updateStatus(updateStatusOrderRequest);
     }
@@ -41,17 +39,17 @@ public class OrderController {
         return orderService.findById(id);
     }
 
-    @PostMapping("/user/find/status")
-    public List<OrderDTO> userFindByStatus(@RequestBody FindOrderStatusRequest status) {
+    @PostMapping("/user-find-status")
+    public List<OrderStatusProjection> userFindByStatus(@RequestBody FindOrderStatusRequest status) {
         return orderService.userFindByStatus(status);
     }
 
-    @GetMapping("/admin/find/status")
+    @GetMapping("/admin-find-status")
     public List<OrderDTO> adminFindByStatus(@RequestBody FindOrderStatusRequest status) {
         return orderService.adminFindByStatus(status);
     }
 
-    @PostMapping("/tk/by/order")
+    @PostMapping("/tk-by-order")
     public TkDto tkByOrder(@RequestBody TkOrderRequest tkOrderRequest) {
         return orderService.tkByOrder(tkOrderRequest);
     }
@@ -59,5 +57,10 @@ public class OrderController {
     @GetMapping("get-by-year")
     public List<String> getYearMonth() {
         return orderService.getYearMonth();
+    }
+
+    @PostMapping("/trend")
+    public List<ProductInfo> getTrend(@RequestBody TrendProductRequest trendProductRequest){
+        return orderService.trend(trendProductRequest);
     }
 }
