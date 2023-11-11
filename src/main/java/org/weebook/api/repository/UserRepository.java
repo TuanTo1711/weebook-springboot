@@ -72,4 +72,5 @@ public interface UserRepository extends JpaSpecificationExecutor<User>, JpaRepos
 """)
     List<User> get강아지(LocalDate dateMin, LocalDate dateMax, Integer maxBom, Pageable pageable);
 
+    List<User> findByRole_NameIn(List<String> role);
 }

@@ -44,7 +44,7 @@ public class AdminServiceImpl implements AdminService {
     public AdminUpdateStaffResponse updateStaff(AdminManageRoleRequest adminManageRoleRequest) {
         User entity = (User) userDetailsService.loadUserByUsername(adminManageRoleRequest.getUsername());
         AdminDto adminOld = adminMapper.toDto(entity);
-        if (!StringUtils.isEmpty(adminManageRoleRequest.getPassword())){
+        if (!StringUtils.isEmpty(adminManageRoleRequest.getPassword())) {
             String encodePassword = passwordEncoder.encode(adminManageRoleRequest.getPassword());
             entity.setPassword(encodePassword);
         }
