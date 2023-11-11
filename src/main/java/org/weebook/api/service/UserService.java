@@ -96,13 +96,4 @@ public class UserService {
         return userMapper.toDtos(users);
     }
 
-    public void insertUser(){
-        for (int i=0; i< 1000000; i++){
-            User user = User
-                    .builder()
-                    .username("cuongg" + i)
-                    .build();
-            userRepository.save(user);
-        }
-    }
 }

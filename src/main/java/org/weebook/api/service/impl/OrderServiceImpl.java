@@ -248,33 +248,7 @@ public class OrderServiceImpl implements OrderService {
         return productMapper.toInfos(products);
     }
 
-    @Override
-    public void addOrder() {
-        for (int i= 10; i<1000000;i++){
-            Order order = Order
-                    .builder()
-                    .discountBalance(BigDecimal.ZERO)
-                    .discountVoucher(BigDecimal.ZERO)
-                    .totalAmount(BigDecimal.ZERO)
-                    .status(status())
-                    .user(User.builder().id((long)i).build())
-                    .build();
-            orderRepository.save(order);
-        }
-    }
 
-    public String status(){
-        Random random = new Random();
-        int count =  random.nextInt(4);
-        switch (count){
-            case 0 : return "Ordering";
-            case 1 : return "confirm";
-            case 2 : return "ship";
-            case 3 : return "success";
-            case 4 : return "cancel";
-            default: return "bom";
-        }
-    }
 
     Transaction transaction(Order order, BigDecimal amount) {
         User user = order.getUser();

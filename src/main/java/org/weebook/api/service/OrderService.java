@@ -26,5 +26,4 @@ public interface OrderService {
 
     List<ProductInfo> trend(LocalDate dateMin, LocalDate dateMax, PagingRequest pagingRequest);
 
-    void addOrder();
 }

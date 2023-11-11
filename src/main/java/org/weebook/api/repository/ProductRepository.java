@@ -28,8 +28,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
 
     @Query("""
         select p from Product p join p.orderItems oi
-        where CAST(oi.order.orderDate AS localdate) >= :dateMin
-            and CAST(oi.order.orderDate AS localdate) <= :dateMax
+        where CAST(oi.order.orderDate AS localdate) BETWEEN :dateMin AND :dateMax
         group by p
         order by cast(sum(oi.unitPrice*oi.quantity) as bigdecimal) desc
     """)

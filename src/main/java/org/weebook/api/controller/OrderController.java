@@ -65,8 +65,4 @@ public class OrderController {
         return orderService.trend(dateMin,dateMax, pagingRequest);
     }
 
-    @GetMapping("/add-order")
-    public void add(){
-        orderService.addOrder();
-    }
 }

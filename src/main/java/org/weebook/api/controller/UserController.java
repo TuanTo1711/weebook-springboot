@@ -60,10 +60,6 @@ public class UserController {
         return userService.getDog(dateMin,dateMax,max, pagingRequest);
     }
 
-    @GetMapping("/insertUser")
-    public void insertUser(){
-        userService.insertUser();
-    }
 
 
 }

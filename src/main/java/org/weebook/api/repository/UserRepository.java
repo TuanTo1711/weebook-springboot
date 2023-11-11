@@ -43,6 +43,8 @@ public interface UserRepository extends JpaSpecificationExecutor<User>, JpaRepos
     """)
     Long getAllNotificationTotal(Long id);
 
+
+    //Dừng có xóa cái này có j sau này t coi lại sao lúc đó t lại code cái này
 //    @Query("""
 //    SELECT u FROM User u
 //               WHERE u.deletedDate IS NULL AND
@@ -72,15 +74,4 @@ public interface UserRepository extends JpaSpecificationExecutor<User>, JpaRepos
 """)
     List<User> get강아지(LocalDate dateMin, LocalDate dateMax, Integer maxBom, Pageable pageable);
 
-
-//    @Query("""
-//        select u from User u join u.orders o
-//        where o.status = 'cancel' and u.deletedDate != null
-//            and CAST(o.orderDate AS localdate) >= :dateMin
-//            and CAST(o.orderDate AS localdate) <= :dateMax
-//            and sum(o.)
-//        group by u
-//        order by count(u) desc
-//    """)
-//    List<User> topOrder(LocalDate dateMin, LocalDate dateMax, Integer max, Pageable pageable);
 }
