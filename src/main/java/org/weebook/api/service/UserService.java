@@ -4,8 +4,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.weebook.api.dto.NotificationDto;
 import org.weebook.api.dto.TransactionDto;
+import org.weebook.api.dto.UserDto;
 import org.weebook.api.web.request.PagingRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface UserService extends UserDetailsManager {
@@ -18,4 +20,7 @@ public interface UserService extends UserDetailsManager {
     Long getAllNotificationUnread();
 
     void updateNotification(Long id);
+
+    List<UserDto> getDog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest);
+
 }

@@ -25,6 +25,7 @@ import org.weebook.api.web.request.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -65,17 +66,19 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setDiscountVoucher(BigDecimal.ZERO);
 
-        if (!StringUtils.hasText(orderRequest.getCode())) {
-            String code = orderRequest.getCode();
-            Optional<Voucher> first = voucherRepository.findAll()
-                    .stream()
-                    .filter(v -> v.getCode().equals(code)
-                            && (Objects.isNull(v.getUser()) || v.getUser().equals(user)))
-                    .findFirst();
-
+        String code = orderRequest.getCode();
+        if (!code.equals("")) {
+            Optional<Voucher> first = voucherRepository.checkVoucherUse(user, code);
             first.ifPresent(voucher -> {
+
                 checkVoucher(voucher, orderRequest.getTotalAmount(), orderRequest.getCode());
-                order.setDiscountVoucher(first.get().getDiscountAmount());
+                BigDecimal voucher_discount = first.get().getDiscountAmount();
+                if(first.get().getType().equals("%")){
+                    BigDecimal percent = voucher_discount.divide(BigDecimal.valueOf(100.0));
+                    order.setDiscountVoucher(orderRequest.getTotalAmount().multiply(percent));
+                }else {
+                    order.setDiscountVoucher(voucher_discount);
+                }
             });
         }
 
@@ -106,6 +109,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public OrderDetailDTO updateStatus(UpdateStatusOrderRequest updateStatusOrderRequest) {
+        String status = updateStatusOrderRequest.getStatus();
         Optional<Order> orderOptional = orderRepository.findById(updateStatusOrderRequest.getIdOrder());
         if (orderOptional.isEmpty()) {
             throw new StringException("Không có order này.");
@@ -127,7 +131,7 @@ public class OrderServiceImpl implements OrderService {
         orderStatus = orderStatusRepository.save(orderStatus);
         order.getOrderStatuses().add(orderStatus);
 
-        if (updateStatusOrderRequest.getStatus().equals("success")) {
+        if (status.equals("success")) {
             BigDecimal amount = order.getTotalAmount().subtract(order.getDiscountVoucher()).subtract(order.getDiscountBalance());
             BigDecimal total_amount = amount.multiply(BigDecimal.valueOf(0.1));
             Transaction transaction = transaction(order, total_amount);
@@ -135,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
             orderRepository.updateBalanceUser(user.getId(), total_amount);
         }
 
-        if (updateStatusOrderRequest.getStatus().equals("cancel")) {
+        if (status.equals("cancel") || status.equals("bom")) {
             Set<OrderItem> orderItems = order.getOrderItems();
             cancel(orderItems);
             if(order.getDiscountBalance().compareTo(BigDecimal.ZERO) > 0){
@@ -171,50 +175,50 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderStatusProjection> userFindByStatus(FindOrderStatusRequest findOrderStatusRequest) {
+    public List<OrderStatusProjection> userFindByStatus(String status, PagingRequest pagingRequest) {
         Authentication currentUser = this.securityContextHolder.getContext().getAuthentication();
         if (ObjectUtils.isEmpty(currentUser)) {
             throw new AccessDeniedException("Can't order as no Authentication object found in context for current user.");
         }
 
-        Pageable pageable = PageRequest.of(findOrderStatusRequest.getPagingRequest().getPageNumber() - 1,
-                findOrderStatusRequest.getPagingRequest().getPageSize());
+        Pageable pageable = PageRequest.of(pagingRequest.getPageNumber() - 1,
+                pagingRequest.getPageSize());
 
         String userName = currentUser.getName();
         User user = (User) userDetailsService.loadUserByUsername(userName);
-        if(findOrderStatusRequest.getStatus().equals("All")){
+        if(status.equals("All")){
             return orderStatusRepository.userGetAllStatus(user.getId(), OrderStatusProjection.class, pageable);
         }
-        return orderStatusRepository.userGetAllStatus(findOrderStatusRequest.getStatus(), user.getId(), OrderStatusProjection.class, pageable);
+        return orderStatusRepository.userGetAllStatus(status, user.getId(), OrderStatusProjection.class, pageable);
     }
 
     @Override
-    public List<OrderDTO> adminFindByStatus(FindOrderStatusRequest findOrderStatusRequest) {
-        List<Order> orders = orderRepository.adminFindByStatus(findOrderStatusRequest.getStatus(), PageRequest.of(findOrderStatusRequest.getPagingRequest().getPageNumber()- 1, findOrderStatusRequest.getPagingRequest().getPageSize()));
+    public List<OrderDTO> adminFindByStatus(String status, PagingRequest pagingRequest) {
+        List<Order> orders = orderRepository.adminFindByStatus(status, PageRequest.of(pagingRequest.getPageNumber()- 1, pagingRequest.getPageSize()));
         return orderMapper.entityOrderToDtos(orders);
     }
 
     @Override
-    public TkDto tkByOrder(TkOrderRequest tkOrderRequest) {
+    public TkDto tkByOrder(String yearMonth, String nameProduct, PagingRequest pagingRequest) {
         List<TKProductDto> tkProductDto;
         BigDecimal total;
-        Pageable pageable = PageRequest.of(tkOrderRequest.getPagingRequest().getPageNumber() - 1, tkOrderRequest.getPagingRequest().getPageSize());
-        if (tkOrderRequest.getYearMonth().equals("All")) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPageNumber() - 1, pagingRequest.getPageSize());
+        if (yearMonth.equals("All")) {
             tkProductDto = orderItemRepository.thongke(
-                    "%" + tkOrderRequest.getNameProduct() + "%",
+                    "%" + nameProduct + "%",
                    pageable );
             total = orderItemRepository.thongketotal(
-                    "%" + tkOrderRequest.getNameProduct() + "%");
+                    "%" + nameProduct + "%");
         } else {
-            String[] monthYear = tkOrderRequest.getYearMonth().split("-");
+            String[] monthYear = yearMonth.split("-");
             tkProductDto = orderItemRepository.thongke(
                     Integer.valueOf(monthYear[1]),
                     Integer.valueOf(monthYear[0]),
-                    "%" + tkOrderRequest.getNameProduct() + "%",
+                    "%" + nameProduct + "%",
                     pageable);
 
             total = orderItemRepository.thongketotal(Integer.valueOf(monthYear[1]), Integer.parseInt(monthYear[0]),
-                    "%" + tkOrderRequest.getNameProduct() + "%");
+                    "%" + nameProduct + "%");
         }
         return TkDto
                 .builder()
@@ -238,11 +242,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<ProductInfo> trend(TrendProductRequest trendProductRequest) {
-        Pageable pageable = PageRequest.of(trendProductRequest.getPagingRequest().getPageNumber()-1, trendProductRequest.getPagingRequest().getPageSize());
-        List<Product> products = productRepository.trend(trendProductRequest.getDateMin(), trendProductRequest.getDateMax(), pageable);
+    public List<ProductInfo> trend(LocalDate dateMin, LocalDate dateMax, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPageNumber()-1, pagingRequest.getPageSize());
+        List<Product> products = productRepository.trend(dateMin, dateMax, pageable);
         return productMapper.toInfos(products);
     }
+
+
 
     Transaction transaction(Order order, BigDecimal amount) {
         User user = order.getUser();

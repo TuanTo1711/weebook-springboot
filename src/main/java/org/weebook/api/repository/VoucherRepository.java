@@ -7,42 +7,43 @@ import org.weebook.api.entity.User;
 import org.weebook.api.entity.Voucher;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 
     @Query("""
-                select new Voucher (v.code,v.condition, v.discountAmount, v.validFrom, v.validTo, v.description)
+                select new Voucher (v.code,v.condition, v.discountAmount, v.validFrom, v.validTo, v.description, v.type)
                 from Voucher v
                 where v.validFrom <= current_timestamp and v.validTo >= current_timestamp
                 and v.user.id = null or v.user.id = :id
-                group by v.code,v.condition,v.discountAmount, v.validFrom, v.validTo, v.description
+                group by v.code,v.condition,v.discountAmount, v.validFrom, v.validTo, v.description, v.type
             """)
     List<Voucher> userGetAll(Long id);
 
 
     @Query("""
-                select new Voucher (v.code,v.condition, v.discountAmount, v.validFrom, v.validTo, v.description)
+                select new Voucher (v.code,v.condition, v.discountAmount, v.validFrom, v.validTo, v.description, v.type)
                 from Voucher v
                 where v.validTo >= current_timestamp
-                group by v.code,v.condition,v.discountAmount, v.validFrom, v.validTo, v.description
+                group by v.code,v.condition,v.discountAmount, v.validFrom, v.validTo, v.description, v.type
             """)
     List<Voucher> adminGetAll(Pageable pageable);
 
     @Query("""
-                select new Voucher (v.code,v.condition, v.discountAmount, v.validFrom, v.validTo, v.description)
+                select new Voucher (v.code,v.condition, v.discountAmount, v.validFrom, v.validTo, v.description, v.type)
                 from Voucher v
                 where v.code = :code
-                group by v.code,v.condition,v.discountAmount, v.validFrom, v.validTo, v.description
+                group by v.code,v.condition,v.discountAmount, v.validFrom, v.validTo, v.description, v.type
             """)
     Voucher findByCode(String code);
 
     @Query("""
-                select new Voucher(v.code,v.condition, v.discountAmount, v.validFrom, v.validTo, v.description)
+                select new Voucher(v.code,v.condition, v.discountAmount, v.validFrom, v.validTo, v.description, v.type)
                 from Voucher v
                 where v.code = :code and (v.user = :user or v.user = null)
-                group by v.code,v.condition,v.discountAmount, v.validFrom, v.validTo, v.description
+                group by v.code,v.condition,v.discountAmount, v.validFrom, v.validTo, v.description, v.type
             """)
-    List<Voucher> checkVoucherUse(User user, String code);
+    Optional<Voucher> checkVoucherUse(User user, String code);
 
 
     List<Voucher> findByCodeEquals(String code);
