@@ -7,10 +7,12 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class TrendProductRequest {
+public class DogRequest {
     LocalDate dateMin;
-
     LocalDate dateMax;
+
+    //Trong 1 khoản thờ gian số lượng người dùng hủy đơn hàng tối đa.
+    Integer max;
 
     PagingRequest pagingRequest;
 }

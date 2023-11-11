@@ -12,8 +12,10 @@ import org.weebook.api.dto.UserDto;
 import org.weebook.api.dto.mapper.UserMapper;
 import org.weebook.api.entity.User;
 import org.weebook.api.service.UserService;
+import org.weebook.api.web.request.DogRequest;
 import org.weebook.api.web.request.PagingRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequestMapping("api/v1/user")
@@ -50,4 +52,12 @@ public class UserController {
     public void updateNotification(@PathVariable("id") Long idNotification){
         userService.updateNotification(idNotification);
     }
+
+    @GetMapping("/dog")
+    public List<UserDto> dog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest){
+        return userService.getDog(dateMin,dateMax,max, pagingRequest);
+    }
+
+
+
 }

@@ -9,6 +9,8 @@ import org.weebook.api.web.request.SignUpRequest;
 import org.weebook.api.web.response.JwtResponse;
 import org.weebook.api.web.response.UpdateProfileResponse;
 
+import java.util.List;
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
@@ -18,6 +20,8 @@ public interface UserMapper {
     JwtResponse toJwtResponse(UserDto userDto, String token);
 
     UserDto toDto(User user);
+
+    List<UserDto> toDtos(List<User> user);
 
     User toEntity(UserDto user);
 

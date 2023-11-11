@@ -37,6 +37,8 @@ public class Voucher implements Serializable {
     @Column(name = "condition")
     private BigDecimal condition;
 
+    private String type;
+
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;
 
@@ -58,13 +60,14 @@ public class Voucher implements Serializable {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Voucher(String code, BigDecimal condition, BigDecimal discountAmount, Instant validFrom, Instant validTo, String description) {
+    public Voucher(String code, BigDecimal condition, BigDecimal discountAmount, Instant validFrom, Instant validTo, String description, String type) {
         this.code = code;
         this.condition = condition;
         this.discountAmount = discountAmount;
         this.validFrom = validFrom;
         this.validTo = validTo;
         this.description = description;
+        this.type = type;
     }
 
     @Override
