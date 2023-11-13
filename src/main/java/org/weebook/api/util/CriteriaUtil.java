@@ -432,6 +432,7 @@ public class CriteriaUtil {
         };
     }
 
+
     public enum CriteriaType {
         EQ, // Equal
         EQLCD, // Equal localdate

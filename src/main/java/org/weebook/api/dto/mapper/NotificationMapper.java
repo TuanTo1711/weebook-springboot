@@ -20,6 +20,10 @@ public interface NotificationMapper {
     @Mapping(target = "user", source = "user")
     Notification notification(String title, String message, String type, User user);
 
+    @Mapping(target = "isRead", expression = "java(false)")
+
+    Notification notification(String title, String message, String type);
+
     NotificationDto entityToDto(Notification notification);
 
     List<NotificationDto> entityToDtos(List<Notification> notification);

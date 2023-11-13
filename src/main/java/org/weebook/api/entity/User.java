@@ -127,6 +127,14 @@ public class User implements UserDetails {
     @OrderBy("createdAt DESC")
     private List<Favorite> favorites = new LinkedList<>();
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "subtract_notification",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "notification_id"))
+    @ToString.Exclude
+    @Builder.Default
+    private List<Notification> users = new LinkedList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return AuthorityUtils.createAuthorityList(role.getName());

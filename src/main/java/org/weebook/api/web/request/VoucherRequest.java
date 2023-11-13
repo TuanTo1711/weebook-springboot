@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Getter
@@ -23,13 +24,9 @@ public class VoucherRequest {
     private String type;
 
 
-    @NotNull(message = "ValidTo not null")
-    @FutureOrPresent(message = "The expiration date must be a future date")
-    private LocalDateTime validTo;
+    private LocalDateTime validTo = LocalDateTime.now();
 
-    @NotNull(message = "ValidFrom not null")
-    @FutureOrPresent(message = "The expiration date must be a future date")
-    private LocalDateTime validFrom;
+    private LocalDateTime validFrom = LocalDateTime.now().plus(7, ChronoUnit.DAYS);;
 
 
     @NotNull(message = "DiscountAmount not null")
