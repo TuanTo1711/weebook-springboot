@@ -21,7 +21,7 @@ import java.util.UUID;
 public interface VoucherMapper {
     @Mapping(target = "validFrom", source = "validFrom", qualifiedByName = "localdate")
     @Mapping(target = "validTo", source = "validTo", qualifiedByName = "localdate")
-    @Mapping(target = "code", expression = "java(UUID.randomUUID().toString())")
+//    @Mapping(target = "code", expression = "java(UUID.randomUUID().toString())")
     Voucher requestToEntity(VoucherRequest voucherRequest);
 
     VoucherDTO entityToDto(Voucher voucher);

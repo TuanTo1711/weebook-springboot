@@ -18,6 +18,7 @@ public interface NotificationMapper {
     @Mapping(target = "isRead", expression = "java(false)")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", source = "user")
+    @Mapping(target = "users", ignore = true)
     Notification notification(String title, String message, String type, User user);
 
     @Mapping(target = "isRead", expression = "java(false)")

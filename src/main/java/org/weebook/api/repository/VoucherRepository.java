@@ -6,7 +6,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.weebook.api.entity.User;
 import org.weebook.api.entity.Voucher;
+import org.weebook.api.web.request.VoucherRequest;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,5 +66,14 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
                 where v.code = :code
             """)
     List<User> findByVoucherCode(String code);
+
+    @Modifying
+    @Query("""
+        update Voucher v
+        set v.type = :type, v.description = :description, v.validTo = :validTo, v.validFrom = :validFrom,
+        v.discountAmount = :discountAmount, v.condition = :condition
+        where v.code = :code
+""")
+    void updateVoucher(String type, String description, Instant validTo, Instant validFrom, BigDecimal discountAmount, BigDecimal condition, String code);
 
 }

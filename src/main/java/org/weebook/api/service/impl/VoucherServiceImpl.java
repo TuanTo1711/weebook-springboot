@@ -31,6 +31,11 @@ import org.weebook.api.web.request.FilterRequest;
 import org.weebook.api.web.request.PagingRequest;
 import org.weebook.api.web.request.VoucherRequest;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -52,14 +57,22 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public VoucherDTO create(VoucherRequest voucherRequest) {
         Voucher voucher = voucherMapper.requestToEntity(voucherRequest);
-        if (voucherRequest.getFilterRequest() == null) {
+        if(voucherRequest.getType().equals("%")){
+            if(voucherRequest.getDiscountAmount().compareTo(BigDecimal.valueOf(100)) >0){
+                throw new StringException("Giảm phần % thì nhập số nhỏ hơn 100");
+            }
+        }
+        Runnable task = () -> {
+            if (voucherRequest.getFilterRequest() == null) {
                 notification(TITLE, "Bạn có 1 voucher mới :" + voucher.getCode(), TYPE);
                 voucherRepository.save(voucher);
-        } else {
-            Specification<User> specification = getSpecificationOr(voucherRequest.getFilterRequest());
-            List<User> users = userRepository.findAll(specification);
-            userVoucherNotification(users, voucher, TITLE, "Bạn có 1 voucher mới :" + voucher.getCode(), TYPE);
-        }
+            } else {
+                Specification<User> specification = getSpecificationOr(voucherRequest.getFilterRequest());
+                List<User> users = userRepository.findAll(specification);
+                userVoucherNotification(users, voucher, TITLE, "Bạn có 1 voucher mới :" + voucher.getCode(), TYPE);
+            }
+        };
+        ExecutorUtils.executor.execute(task);
         return voucherMapper.entityToDto(voucher);
     }
 
@@ -74,20 +87,27 @@ public class VoucherServiceImpl implements VoucherService {
         }
         Voucher checkVoucher = vouchers.get(0);
 
-            Specification<User> specification = getSpecificationOr(addVoucherVaoUserRequest.getFilterRequest());
-            List<User> userSpec = userRepository.findAll(specification);
-            if (checkVoucher.getUser() == null) {
-                String message = "Xin loi vì voucher : " + addVoucherVaoUserRequest.getVoucherDTO().getCode() + " chỉ dành cho những khách đặc biệt";
-                subtract_notification(userSpec,"Delete Voucher", message, TYPE);
-                voucherRepository.deleteVoucher(addVoucherVaoUserRequest.getVoucherDTO().getCode());
-                userVoucher(userSpec, checkVoucher);
-            }else{
-                List<User> userOnVoucher = voucherRepository.findByVoucherCode(addVoucherVaoUserRequest.getVoucherDTO().getCode());
-                List<User> users = userRepository.getUser(userSpec, userOnVoucher);
-                userVoucherNotification(users, checkVoucher, TITLE, "Bạn có 1 voucher mới :" + checkVoucher.getCode(), TYPE);
-            }
+                Specification<User> specification = getSpecificationOr(addVoucherVaoUserRequest.getFilterRequest());
+                List<User> userSpec = userRepository.findAll(specification);
+                if (checkVoucher.getUser() == null) {
+                    String message = "Xin loi vì voucher : " + addVoucherVaoUserRequest.getVoucherDTO().getCode() + " chỉ dành cho những khách đặc biệt";
+                    subtract_notification(userSpec,"Delete Voucher", message, TYPE);
+                    voucherRepository.deleteVoucher(addVoucherVaoUserRequest.getVoucherDTO().getCode());
+                    userVoucher(userSpec, checkVoucher);
+                }else{
+                    List<User> userOnVoucher = voucherRepository.findByVoucherCode(addVoucherVaoUserRequest.getVoucherDTO().getCode());
+                    List<User> users = userRepository.getUser(userSpec, userOnVoucher);
+                    userVoucherNotification(users, checkVoucher, TITLE, "Bạn có 1 voucher mới :" + checkVoucher.getCode(), TYPE);
+                }
 
         return addVoucherVaoUserRequest.getVoucherDTO();
+    }
+
+    @Override
+    public void update(VoucherRequest voucherRequest) {
+        Instant validTo = instant(voucherRequest.getValidTo());
+        Instant validFrom = instant(voucherRequest.getValidFrom());
+        voucherRepository.updateVoucher(voucherRequest.getType(), voucherRequest.getDescription(), validTo, validFrom, voucherRequest.getDiscountAmount(), voucherRequest.getCondition(), voucherRequest.getCode());
     }
 
     @Override
@@ -99,7 +119,6 @@ public class VoucherServiceImpl implements VoucherService {
 
         String userName = currentUser.getName();
         User user = (User) userDetailsService.loadUserByUsername(userName);
-        System.out.println(user.getId());
         List<Voucher> vouchers = voucherRepository.userGetAll(user.getId());
         return voucherMapper.entityToDtos(vouchers);
     }
@@ -119,15 +138,18 @@ public class VoucherServiceImpl implements VoucherService {
             return null;
         }
         Voucher checkVoucher = vouchers.get(0);
-        if (checkVoucher.getUser() == null) {
-            String message = "Xin lỗi vì đã xóa voucher : " + code;
-            notification("Delete Voucher", message, TYPE);
-        }else{
-            List<User> users = voucherRepository.findByVoucherCode(code);
-            userAddNotifications(users, TITLE, MESSAGE_DELETE + code, TYPE);
-            userRepository.saveAllAndFlush(users);
-        }
-        voucherRepository.deleteVoucherByCodeEquals(code);
+        Runnable task = () -> {
+            if (checkVoucher.getUser() == null) {
+                String message = "Xin lỗi vì đã xóa voucher : " + code;
+                notification("Delete Voucher", message, TYPE);
+            }else{
+                List<User> users = voucherRepository.findByVoucherCode(code);
+                userAddNotifications(users, TITLE, MESSAGE_DELETE + code, TYPE);
+                userRepository.saveAllAndFlush(users);
+            }
+            voucherRepository.deleteVoucherByCodeEquals(code);
+        };
+        ExecutorUtils.executor.execute(task);
         return "Delete successfully";
     }
 
@@ -201,6 +223,11 @@ public class VoucherServiceImpl implements VoucherService {
         return filterRequests.stream()
                 .<Specification<T>>map(CriteriaUtil::toSpecification)
                 .reduce(Specification.where(null), Specification::or);
+    }
+
+    Instant instant(LocalDateTime localDateTime) {
+        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+        return zonedDateTime.toInstant();
     }
 
 

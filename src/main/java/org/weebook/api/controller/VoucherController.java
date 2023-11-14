@@ -29,6 +29,10 @@ public class VoucherController {
         return voucherService.create(addVoucherVaoUserRequest);
     }
 
+    @PostMapping("/update")
+    void update(@Valid @RequestBody VoucherRequest voucherRequest){voucherService.update(voucherRequest);
+    }
+
     @GetMapping("/code")
     VoucherDTO findByCode(@Param("code") String code){
         return voucherService.findByCode(code);
