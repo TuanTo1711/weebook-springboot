@@ -17,4 +17,8 @@ public class OrderDTO {
     private BigDecimal discountVoucher;
     private String deliveryAddress;
     private UserDto user;
+
+    private String name;
+
+    private String phone;
 }

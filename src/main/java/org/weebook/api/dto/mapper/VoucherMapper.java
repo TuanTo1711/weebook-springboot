@@ -38,6 +38,9 @@ public interface VoucherMapper {
 
     @Named("localdate")
     default Instant localdate(LocalDateTime localDateTime) {
+        if(localDateTime == null){
+            localDateTime = LocalDateTime.now();
+        }
         ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
         return zonedDateTime.toInstant();
     }
