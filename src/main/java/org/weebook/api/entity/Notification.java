@@ -10,6 +10,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 @Builder
@@ -54,6 +56,14 @@ public class Notification implements Serializable {
     @LastModifiedDate
     @Column(name = "updated_date")
     private Instant updatedDate;
+
+    @ManyToMany(cascade = CascadeType.MERGE)
+    @JoinTable(name = "subtract_notification",
+            joinColumns = @JoinColumn(name = "notification_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @ToString.Exclude
+    @Builder.Default
+    private List<User> users = new LinkedList<>();
 
     @Override
     public final boolean equals(Object o) {

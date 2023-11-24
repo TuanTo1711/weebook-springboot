@@ -16,6 +16,9 @@ public class OrderDetailDTO {
     private BigDecimal discountBalance;
     private BigDecimal discountVoucher;
     private String deliveryAddress;
+    private String name;
+
+    private String phone;
     private UserDto user;
     private Set<OrderItemDTO> orderItems;
     private Set<OrderStatusDTO> orderStatuses;

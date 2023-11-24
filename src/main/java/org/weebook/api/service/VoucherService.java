@@ -13,6 +13,8 @@ public interface VoucherService {
 
     VoucherDTO create(AddVoucherVaoUserRequest addVoucherVaoUserRequest);
 
+    void update(VoucherRequest voucherRequest);
+
     List<VoucherDTO> userGetAll();
 
     List<VoucherDTO> adminGetAll(PagingRequest pagingRequest);

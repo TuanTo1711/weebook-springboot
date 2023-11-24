@@ -29,6 +29,10 @@ public interface OrderStatusProjection {
 
         Instant getDeliveryDate();
 
+        String getName();
+
+        String getPhone();
+
 
         String getDeliveryStatus();
 

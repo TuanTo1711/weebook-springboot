@@ -29,8 +29,9 @@ public interface UserRepository extends JpaSpecificationExecutor<User>, JpaRepos
     Page<Transaction> getAllTransaction(Long id, Pageable pageable);
 
     @Query("""
-                select n from Notification n
-                where n.user.id = :id
+                select n from Notification n left join n.users u
+                where n.user.id = :id or (n.user.id = null and (u.id = null or u.id != :id))
+                group by n
             """)
     Page<Notification> getAllNotification(Long id, Pageable pageable);
 
@@ -40,6 +41,13 @@ public interface UserRepository extends JpaSpecificationExecutor<User>, JpaRepos
                 group by n.user
             """)
     Long getAllNotificationTotal(Long id);
+
+    @Query("""
+        select u from User u
+        where u in :userSepec and u not in :userVoucher
+    """)
+    List<User> getUser(List<User> userSepec, List<User> userVoucher);
+
 
 
     //Dừng có xóa cái này có j sau này t coi lại sao lúc đó t lại code cái này

@@ -17,6 +17,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.weebook.api.dto.NotificationDto;
 import org.weebook.api.dto.TransactionDto;
+import org.weebook.api.dto.UserDto;
 import org.weebook.api.dto.mapper.NotificationMapper;
 import org.weebook.api.dto.mapper.OrderMapper;
 import org.weebook.api.entity.Notification;
@@ -27,6 +28,7 @@ import org.weebook.api.repository.UserRepository;
 import org.weebook.api.service.UserService;
 import org.weebook.api.web.request.PagingRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,6 +107,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<NotificationDto> getAllNotification(PagingRequest pagingRequest) {
         User user = getUser();
+        System.out.println(user.getId());
         var pageable = PageRequest.of(pagingRequest.getPageNumber() - 1, pagingRequest.getPageSize());
         Page<Notification> notification = userRepository.getAllNotification(user.getId(), pageable);
         return notificationMapper.entityToDtos(notification.getContent());
@@ -124,6 +127,11 @@ public class UserServiceImpl implements UserService {
         Notification notification = optionalNotification.get();
         notification.setIsRead(true);
         notificationRepository.save(notification);
+    }
+
+    @Override
+    public List<UserDto> getDog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest) {
+        return null;
     }
 
     private User getUser() {

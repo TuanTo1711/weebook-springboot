@@ -26,6 +26,12 @@ public class OrderRequest {
     @NotBlank(message = "Shipping method not blank")
     private String shippingMethod;
 
+    @NotBlank(message = "Name not blank")
+    String name;
+
+    @NotBlank(message = "Phone address not blank")
+    String phone;
+
     private String code;
 
     private BigDecimal discountBalance = BigDecimal.ZERO;
