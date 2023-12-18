@@ -21,6 +21,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
     @NonNull
     List<Product> findAll(@NonNull Specification<Product> spec);
 
+    @Override
+    @NonNull
+    @EntityGraph(attributePaths = {"images", "category"})
+    Page<Product> findAll(@NonNull Pageable pageable);
+
     @EntityGraph(attributePaths = {"images", "reviews", "authors", "category"})
     @Override
     @NonNull

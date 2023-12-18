@@ -3,7 +3,6 @@ package org.weebook.api.dto;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,9 +13,10 @@ public record ProductDetail(
         String supplierName, Integer weight, String packageSize, String content, String publisher,
         String publishYear, String translator, String language, String chapter, Integer pageNumber,
         String brand, String origin, String madeIn, String color, String material, String formality,
-        Integer quantity, Instant estimatedDate, String status, String seriesName,
-        Set<String> authors,
-        Set<String> genres,
+        Integer quantity, Instant estimatedDate, String status,
+        //        Set<String> authors,
+//        Set<String> genres,
         Set<String> images,
-        Set<ReviewDto> reviews) implements Serializable {
+//        Set<ReviewDto> reviews
+        Long categoryId) implements Serializable {
 }

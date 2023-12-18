@@ -53,10 +53,10 @@ public class UserController {
         userService.updateNotification(idNotification);
     }
 
-    @GetMapping("/dog")
-    public List<UserDto> dog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest){
-        return userService.getDog(dateMin,dateMax,max, pagingRequest);
-    }
+//    @GetMapping("/dog")
+//    public List<UserDto> dog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest){
+//        return userService.getDog(dateMin,dateMax,max, pagingRequest);
+//    }
 
 
 

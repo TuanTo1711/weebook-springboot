@@ -12,6 +12,7 @@ import java.util.List;
         componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ProductMapper {
 
+    @Mapping(source = "categoryId", target = "category.id")
     Product toEntity(ProductDetail productInfo);
 
     @Mapping(target = "totalReviews", expression = "java(product.getReviews().size())")
@@ -19,6 +20,7 @@ public interface ProductMapper {
 
     List<ProductInfo> toInfos(List<Product> product);
 
+    @Mapping(source = "category.id", target = "categoryId")
     ProductDetail toDetail(Product product);
 
     @AfterMapping

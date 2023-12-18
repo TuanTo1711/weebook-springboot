@@ -21,6 +21,6 @@ public interface UserService extends UserDetailsManager {
 
     void updateNotification(Long id);
 
-    List<UserDto> getDog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest);
+//    List<UserDto> getDog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest);
 
 }

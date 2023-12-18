@@ -1,11 +1,11 @@
 version: '3.8'
 services:
   postgres:
+    container_name: "db"
     image: 'postgres:latest'
     environment:
-      - 'TZ=Asia/Ho_Chi_Minh'
-      - 'POSTGRES_DB=db-schema'
-      - 'POSTGRES_PASSWORD=db-password'
-      - 'POSTGRES_USER=db-user'
+      - 'POSTGRES_DB=postgres'
+      - 'POSTGRES_PASSWORD=nDR2nkhnl7dnJwEO'
+      - 'POSTGRES_USER=postgres'
     ports:
       - '5432:5432'
