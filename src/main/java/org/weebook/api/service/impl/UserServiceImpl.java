@@ -129,11 +129,6 @@ public class UserServiceImpl implements UserService {
         notificationRepository.save(notification);
     }
 
-    @Override
-    public List<UserDto> getDog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest) {
-        return null;
-    }
-
     private User getUser() {
         Authentication currentUser = this.securityContextHolderStrategy.getContext().getAuthentication();
         if (ObjectUtils.isEmpty(currentUser)) {

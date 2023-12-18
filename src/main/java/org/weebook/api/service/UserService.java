@@ -20,7 +20,4 @@ public interface UserService extends UserDetailsManager {
     Long getAllNotificationUnread();
 
     void updateNotification(Long id);
-
-//    List<UserDto> getDog(LocalDate dateMin, LocalDate dateMax, Integer max, PagingRequest pagingRequest);
-
 }
