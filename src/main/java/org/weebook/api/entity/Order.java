@@ -1,6 +1,7 @@
 package org.weebook.api.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedDate;
@@ -41,6 +42,10 @@ public class Order implements Serializable {
 
     @Column(name = "discount_balance")
     private BigDecimal discountBalance;
+
+    private String name;
+
+    private String phone;
 
     @Column(name = "discount_voucher")
     private BigDecimal discountVoucher;

@@ -33,13 +33,13 @@ public class UserController {
         return userMapper.toDto(userDetails);
     }
 
-    @PostMapping("/get/transaction")
-    public List<TransactionDto> getAllTransaction(@RequestBody PagingRequest pagingRequest){
+    @GetMapping("/get/transaction")
+    public List<TransactionDto> getAllTransaction(@ModelAttribute PagingRequest pagingRequest){
         return userService.getAllTransaction(pagingRequest);
     }
 
-    @PostMapping("/get/notification")
-    public List<NotificationDto> getAllNotification(@RequestBody PagingRequest pagingRequest){
+    @GetMapping("/get/notification")
+    public List<NotificationDto> getAllNotification(@ModelAttribute PagingRequest pagingRequest){
         return userService.getAllNotification(pagingRequest);
     }
 

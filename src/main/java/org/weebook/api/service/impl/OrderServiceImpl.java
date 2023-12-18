@@ -53,6 +53,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDetailDTO sendOrder(OrderRequest orderRequest) {
         Order order = orderMapper.requestOrderToEntity(orderRequest, "Ordering");
 
+
         Authentication currentUser = this.securityContextHolder.getContext().getAuthentication();
         if (ObjectUtils.isEmpty(currentUser)) {
             throw new AccessDeniedException("Can't order as no Authentication object found in context for current user.");
@@ -67,10 +68,9 @@ public class OrderServiceImpl implements OrderService {
         order.setDiscountVoucher(BigDecimal.ZERO);
 
         String code = orderRequest.getCode();
-        if (!code.equals("")) {
+        if (code != null) {
             Optional<Voucher> first = voucherRepository.checkVoucherUse(user, code);
             first.ifPresent(voucher -> {
-
                 checkVoucher(voucher, orderRequest.getTotalAmount(), orderRequest.getCode());
                 BigDecimal voucher_discount = first.get().getDiscountAmount();
                 if(first.get().getType().equals("%")){
@@ -80,6 +80,9 @@ public class OrderServiceImpl implements OrderService {
                     order.setDiscountVoucher(voucher_discount);
                 }
             });
+            if (first.isEmpty()){
+                throw new StringException("Voucher không tồn tại");
+            }
         }
 
         OrderStatus orderStatus = orderMapper.buildOrderStatus("Ordering");
@@ -88,6 +91,7 @@ public class OrderServiceImpl implements OrderService {
         orderStatus.setOrder(order);
 
         Order saved = orderRepository.saveAndFlush(order);
+        System.out.println("sadfasdfsdaf");
 
         if(orderRequest.getDiscountBalance().compareTo(BigDecimal.ZERO) > 0){
             Transaction transaction = transaction(saved, orderRequest.getDiscountBalance().negate());
@@ -99,8 +103,8 @@ public class OrderServiceImpl implements OrderService {
                 "Thông báo về đơn hàng",
                 "Đặt đơn hàng thành công vào lúc: " + Instant.now().toString()
                         + ". Mã đơn hàng: " + saved.getId(),
-                "order",
-                user);
+                "order");
+        notification.setUser(user);
         notificationRepository.save(notification);
         return orderMapper.entityOrderDetailToDto(saved);
     }
